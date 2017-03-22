@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 6142 $ $Date:: 2017-03-20 #$ $Author: serge $
+// $Revision: 6161 $ $Date:: 2017-03-21 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -40,6 +40,14 @@ UserManager::UserManager()
 {
 }
 
+UserManager::~UserManager()
+{
+    for( auto e: map_id_to_user_ )
+    {
+        delete e.second;
+    }
+}
+
 bool UserManager::init(
         const std::string   & credentials_file )
 {
@@ -50,6 +58,62 @@ bool UserManager::init(
     return b;
 }
 
+bool UserManager::add( User * user, std::string & error_msg )
+{
+    MUTEX_SCOPE_LOCK( mutex_ );
+
+    auto it = map_id_to_user_.find( user->user_id );
+    if( it != map_id_to_user_.end() )
+    {
+        error_msg   = "user id " + std::to_string( user->user_id ) + " already exists";
+        return false;
+    }
+
+    auto it2 = map_login_to_user_id_.find( user->login );
+    if( it2 != map_login_to_user_id_.end() )
+    {
+        error_msg   = "user login " + user->login + " (with user id " + std::to_string( user->user_id ) + ") already exists";
+        return false;
+    }
+
+    map_id_to_user_.insert( std::make_pair( user->user_id, user ) );
+    map_login_to_user_id_.insert( std::make_pair( user->login, user->user_id ) );
+
+    return true;
+}
+
+const User* UserManager::find( uint32_t user_id ) const
+{
+    MUTEX_SCOPE_LOCK( mutex_ );
+
+    return find__( user_id );
+}
+
+const User* UserManager::find__( uint32_t user_id ) const
+{
+    auto it = map_id_to_user_.find( user_id );
+
+    if( it != map_id_to_user_.end() )
+    {
+        return it->second;
+    }
+
+    return nullptr;
+}
+
+const User* UserManager::find( const std::string & login ) const
+{
+    MUTEX_SCOPE_LOCK( mutex_ );
+
+    auto it = map_login_to_user_id_.find( login );
+
+    if( it != map_login_to_user_id_.end() )
+    {
+        return find__( it->second );
+    }
+
+    return nullptr;
+}
 
 bool UserManager::is_inited__() const
 {
@@ -74,7 +138,30 @@ bool UserManager::load_credentials( const std::string & credentials_file )
         return false;
     }
 
+    auto b = init_login_map();
+
+    if( b == false )
+    {
+        dummy_log_error( MODULENAME, "load_credentials: cannot init login map, duplicate logins found" );
+        return false;
+    }
+
     dummy_log_info( MODULENAME, "load_credentials: loaded %d entries", map_id_to_user_.size() );
+
+    return true;
+}
+
+bool UserManager::init_login_map()
+{
+    for( auto e : map_id_to_user_ )
+    {
+        auto b = map_login_to_user_id_.insert( std::make_pair( e.second->login, e.first ) ).second;
+
+        if( b == false )
+        {
+            return false;
+        }
+    }
 
     return true;
 }

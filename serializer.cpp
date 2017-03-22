@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 6132 $ $Date:: 2017-03-20 #$ $Author: serge $
+// $Revision: 6151 $ $Date:: 2017-03-21 #$ $Author: serge $
 
 #include "serializer.h"     // self
 
@@ -30,10 +30,39 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 namespace serializer
 {
+
 user_manager::User* load( std::istream & is, user_manager::User* e )
 {
-    return user_manager::Serializer::load( is, e );
+    if( e != nullptr )
+        throw std::invalid_argument( "Serializer::load: e must be null" );
+
+    auto el = new user_manager::User;
+
+    auto res = user_manager::Serializer::load( is, static_cast< user_manager::User *>( el ) );
+
+    if( res == nullptr )
+    {
+        delete el;
+        return nullptr;
+    }
+
+    return el;
 }
+
+user_manager::User** load( std::istream & is, user_manager::User** e )
+{
+    auto res = load( is, static_cast< user_manager::User *>( nullptr ) );
+
+    if( res == nullptr )
+    {
+        return nullptr;
+    }
+
+    *e =  res;
+
+    return e;
+}
+
 }
 
 namespace user_manager

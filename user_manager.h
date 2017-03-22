@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 6142 $ $Date:: 2017-03-20 #$ $Author: serge $
+// $Revision: 6161 $ $Date:: 2017-03-21 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -38,19 +38,30 @@ class UserManager
 public:
 
     UserManager();
+    ~UserManager();
 
     bool init(
             const std::string & credentials_file );
 
+    bool add( User * user, std::string & error_msg );
+
+    const User* find( uint32_t user_id ) const;
+
+    const User* find( const std::string & login ) const;
+
 private:
 
-    typedef std::map<uint32_t,User>     MapUserIdToUser;
+    typedef std::map<uint32_t,User*>        MapUserIdToUser;
+    typedef std::map<std::string,uint32_t>  MapLoginToUserId;
 
 private:
+
+    const User* find__( uint32_t user_id ) const;
 
     bool is_inited__() const;
 
     bool load_credentials( const std::string & credentials_file );
+    bool init_login_map();
 
 private:
     mutable std::mutex          mutex_;
@@ -59,6 +70,7 @@ private:
     std::string                 credentials_file_;
 
     MapUserIdToUser             map_id_to_user_;
+    MapLoginToUserId            map_login_to_user_id_;
 };
 
 } // namespace user_manager
