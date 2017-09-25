@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 6151 $ $Date:: 2017-03-21 #$ $Author: serge $
+// $Revision: 7916 $ $Date:: 2017-09-25 #$ $Author: serge $
 
 #include "serializer.h"     // self
 
@@ -109,13 +109,57 @@ User* Serializer::load_1( std::istream & is, User* e )
     e->email_2      = utils::nonascii_hex_codec::decode( email_2 );
     e->phone        = utils::nonascii_hex_codec::decode( phone );
     e->phone_2      = utils::nonascii_hex_codec::decode( phone_2 );
+    e->utc_offset   = 0;
 
     return e;
 }
 
+User* Serializer::load_2( std::istream & is, User* res )
+{
+    if( res == nullptr )
+        throw std::invalid_argument( "Serializer::load: res must not be null" );
+
+    uint32_t    status;
+    uint32_t    gender;
+
+    if( serializer::load( is, & res->user_id ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->group_id ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & status ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->login ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->password_hash ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & gender ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->name ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->first_name ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->company_name ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->email ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->email_2 ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->phone ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->phone_2 ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->utc_offset ) == nullptr )
+        return nullptr;
+
+    res->status     = static_cast<status_e>( status );
+    res->gender     = static_cast<gender_e>( gender );
+
+    return res;
+}
+
 User* Serializer::load( std::istream & is, User* e )
 {
-    return load_t_1( is, e );
+    return load_t_1_2( is, e );
 }
 
 bool Serializer::save( std::ostream & os, const User & e )

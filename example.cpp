@@ -24,6 +24,7 @@ void test_2()
     //u->email_2;
     u->phone        = "+1234567890";
     //u->phone_2;
+    u->utc_offset   = 0;
 
     std::string error_msg;
 

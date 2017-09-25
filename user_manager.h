@@ -19,14 +19,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 6161 $ $Date:: 2017-03-21 #$ $Author: serge $
+// $Revision: 7913 $ $Date:: 2017-09-25 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
 
 #include <mutex>            // std::mutex
 #include <map>              // std::map
-#include <cstdint>          // uint32_t
 
 #include "user.h"           // User
 
@@ -45,18 +44,18 @@ public:
 
     bool add( User * user, std::string & error_msg );
 
-    const User* find( uint32_t user_id ) const;
+    const User* find( user_id_t user_id ) const;
 
     const User* find( const std::string & login ) const;
 
 private:
 
-    typedef std::map<uint32_t,User*>        MapUserIdToUser;
-    typedef std::map<std::string,uint32_t>  MapLoginToUserId;
+    typedef std::map<user_id_t,User*>       MapUserIdToUser;
+    typedef std::map<std::string,user_id_t> MapLoginToUserId;
 
 private:
 
-    const User* find__( uint32_t user_id ) const;
+    const User* find__( user_id_t user_id ) const;
 
     bool is_inited__() const;
 

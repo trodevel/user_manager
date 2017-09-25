@@ -19,13 +19,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 6126 $ $Date:: 2017-03-20 #$ $Author: serge $
+// $Revision: 7914 $ $Date:: 2017-09-25 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
 
 #include <map>              // std::map
-#include <cstdint>          // uint32_t
+#include "types.h"          // user_id_t
 
 namespace user_manager
 {
@@ -46,8 +46,8 @@ enum class gender_e
 
 struct User
 {
-    uint32_t    user_id;
-    uint32_t    group_id;
+    user_id_t   user_id;
+    group_id_t  group_id;
     status_e    status;
     std::string login;
     std::string password_hash;
@@ -60,6 +60,7 @@ struct User
     std::string email_2;
     std::string phone;
     std::string phone_2;
+    int32_t     utc_offset;
 };
 
 } // namespace user_manager

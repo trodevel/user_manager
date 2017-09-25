@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 6151 $ $Date:: 2017-03-21 #$ $Author: serge $
+// $Revision: 7916 $ $Date:: 2017-09-25 #$ $Author: serge $
 
 #ifndef USER_MANAGER_SERIALIZER_H
 #define USER_MANAGER_SERIALIZER_H
@@ -50,6 +50,7 @@ public:
 private:
 
     static User* load_1( std::istream & is, User* e );
+    static User* load_2( std::istream & is, User* e );
 };
 
 } // namespace user_manager
