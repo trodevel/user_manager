@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 7916 $ $Date:: 2017-09-25 #$ $Author: serge $
+// $Revision: 7925 $ $Date:: 2017-09-26 #$ $Author: serge $
 
 #include "serializer.h"     // self
 
@@ -109,7 +109,6 @@ User* Serializer::load_1( std::istream & is, User* e )
     e->email_2      = utils::nonascii_hex_codec::decode( email_2 );
     e->phone        = utils::nonascii_hex_codec::decode( phone );
     e->phone_2      = utils::nonascii_hex_codec::decode( phone_2 );
-    e->utc_offset   = 0;
 
     return e;
 }
@@ -148,11 +147,20 @@ User* Serializer::load_2( std::istream & is, User* res )
         return nullptr;
     if( serializer::load( is, & res->phone_2 ) == nullptr )
         return nullptr;
-    if( serializer::load( is, & res->utc_offset ) == nullptr )
+    if( serializer::load( is, & res->timezone ) == nullptr )
         return nullptr;
 
     res->status     = static_cast<status_e>( status );
     res->gender     = static_cast<gender_e>( gender );
+
+    res->password_hash  = utils::unhex_string( res->password_hash );
+    res->name           = utils::nonascii_hex_codec::decode( res->name );
+    res->first_name     = utils::nonascii_hex_codec::decode( res->first_name );
+    res->company_name   = utils::nonascii_hex_codec::decode( res->company_name );
+    res->email          = utils::nonascii_hex_codec::decode( res->email );
+    res->email_2        = utils::nonascii_hex_codec::decode( res->email_2 );
+    res->phone          = utils::nonascii_hex_codec::decode( res->phone );
+    res->phone_2        = utils::nonascii_hex_codec::decode( res->phone_2 );
 
     return res;
 }
@@ -164,28 +172,29 @@ User* Serializer::load( std::istream & is, User* e )
 
 bool Serializer::save( std::ostream & os, const User & e )
 {
-    static const unsigned int VERSION = 1;
+    static const unsigned int VERSION = 2;
 
-    os << VERSION << " ";
+    auto b = serializer::save( os, VERSION );
 
-    os << e.user_id << " "
-            << e.group_id     << " "
-            << static_cast<unsigned>( e.status ) << " "
-            << e.login        << " "
-            << utils::hex_string( e.password_hash ) << " "
-            << static_cast<unsigned>( e.gender ) << " "
-            << utils::nonascii_hex_codec::encode( e.name ) << " "
-            << utils::nonascii_hex_codec::encode( e.first_name ) << " "
-            << utils::nonascii_hex_codec::encode( e.company_name ) << " "
-            << utils::nonascii_hex_codec::encode( e.email ) << " "
-            << utils::nonascii_hex_codec::encode( e.email_2 ) << " "
-            << utils::nonascii_hex_codec::encode( e.phone ) << " "
-            << utils::nonascii_hex_codec::encode( e.phone_2 ) << " ";
-
-    if( os.fail() )
+    if( b == false )
         return false;
 
-    return true;
+    b &= serializer::save( os, e.user_id );
+    b &= serializer::save( os, e.group_id );
+    b &= serializer::save( os, static_cast<unsigned>( e.status ) );
+    b &= serializer::save( os, e.login );
+    b &= serializer::save( os, utils::hex_string( e.password_hash ) );
+    b &= serializer::save( os, static_cast<unsigned>( e.gender ) );
+    b &= serializer::save( os, utils::nonascii_hex_codec::encode( e.name ) );
+    b &= serializer::save( os, utils::nonascii_hex_codec::encode( e.first_name ) );
+    b &= serializer::save( os, utils::nonascii_hex_codec::encode( e.company_name ) );
+    b &= serializer::save( os, utils::nonascii_hex_codec::encode( e.email ) );
+    b &= serializer::save( os, utils::nonascii_hex_codec::encode( e.email_2 ) );
+    b &= serializer::save( os, utils::nonascii_hex_codec::encode( e.phone ) );
+    b &= serializer::save( os, utils::nonascii_hex_codec::encode( e.phone_2 ) );
+    b &= serializer::save( os, e.timezone );
+
+    return b;
 }
 
 } // namespace user_manager

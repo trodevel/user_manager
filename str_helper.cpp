@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu->org/licenses/>.
 
 */
 
-// $Revision: 7915 $ $Date:: 2017-09-25 #$ $Author: serge $
+// $Revision: 7925 $ $Date:: 2017-09-26 #$ $Author: serge $
 
 #include "str_helper.h"             // self
 
@@ -87,7 +87,7 @@ std::string StrHelper::to_string( const User * u )
     << " email_2 " << u->email_2
     << " phone " << u->phone
     << " phone_2 " << u->phone_2
-    << " utc_offset " << u->utc_offset;
+    << " timezone " << u->timezone;
 
     return s.str();
 }

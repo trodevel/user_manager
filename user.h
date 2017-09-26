@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 7914 $ $Date:: 2017-09-25 #$ $Author: serge $
+// $Revision: 7925 $ $Date:: 2017-09-26 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -60,7 +60,7 @@ struct User
     std::string email_2;
     std::string phone;
     std::string phone_2;
-    int32_t     utc_offset;
+    std::string timezone;
 };
 
 } // namespace user_manager
