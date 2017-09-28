@@ -4,27 +4,57 @@
 #include "user_manager.h"       //
 #include "str_helper.h"         // StrHelper
 
+user_manager::User * create_user_1()
+{
+    auto res = new user_manager::User;
+
+    res->user_id        = 1;
+    res->group_id       = 1;
+    res->status         = user_manager::status_e::ACTIVE;
+    res->login          = "test";
+    res->password_hash  = "\xf0\xf0\xf0";
+
+    res->gender         = user_manager::gender_e::MALE;
+    res->name           = "Doe";
+    res->first_name     = "John";
+    res->company_name   = "Yoyodyne Inc.";
+    res->email          = "john.doe@yoyodyne.com";
+    //res->email_2;
+    res->phone          = "+1234567890";
+    //res->phone_2;
+    res->timezone       = "Europe/Berlin";
+
+    return res;
+}
+
+user_manager::User * create_user_2()
+{
+    auto res = new user_manager::User;
+
+    res->user_id        = 2;
+    res->group_id       = 1;
+    res->status         = user_manager::status_e::ACTIVE;
+    res->login          = "test2";
+    res->password_hash  = "\xae\xae\xae";
+
+    res->gender         = user_manager::gender_e::FEMALE;
+    res->name           = "Bowie";
+    res->first_name     = "Doris";
+    res->company_name   = "Yoyodyne Inc.";
+    res->email          = "doris.bowie@yoyodyne.com";
+    //res->email_2;
+    res->phone          = "+9876542310";
+    res->phone_2        = "+877777777";
+    res->timezone       = "Europe/London";
+
+    return res;
+}
+
 void test_2()
 {
     user_manager::UserManager m;
 
-    user_manager::User * u = new user_manager::User;
-
-    u->user_id  = 1;
-    u->group_id = 1;
-    u->status   = user_manager::status_e::ACTIVE;
-    u->login    = "test";
-    u->password_hash    = "f0f0f0";
-
-    u->gender   = user_manager::gender_e::MALE;
-    u->name         = "Doe";
-    u->first_name   = "John";
-    u->company_name = "Yoyodyne Inc.";
-    u->email        = "joh.doe@yoyodyne.com";
-    //u->email_2;
-    u->phone        = "+1234567890";
-    //u->phone_2;
-    u->timezone     = "Europe/Berlin";
+    auto u = create_user_1();
 
     std::string error_msg;
 
@@ -79,6 +109,31 @@ void test_4( user_manager::UserManager & m )
     }
 }
 
+
+void test_5()
+{
+    user_manager::UserManager m;
+
+    auto u1 = create_user_1();
+    auto u2 = create_user_2();
+
+    std::string error_msg;
+
+    m.add( u1, error_msg );
+    m.add( u2, error_msg );
+
+    auto b = m.save( & error_msg, "test.dat" );
+
+    if( b )
+    {
+        std::cout << "OK: user file was written" << std::endl;
+    }
+    else
+    {
+        std::cout << "ERROR: cannot write file: " << error_msg << std::endl;
+    }
+}
+
 int main( int argc, const char* argv[] )
 {
     user_manager::UserManager m;
@@ -98,6 +153,7 @@ int main( int argc, const char* argv[] )
     test_2();
     test_3( m );
     test_4( m );
+    test_5();
 
     return 0;
 }

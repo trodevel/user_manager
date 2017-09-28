@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 7916 $ $Date:: 2017-09-25 #$ $Author: serge $
+// $Revision: 7939 $ $Date:: 2017-09-28 #$ $Author: serge $
 
 #ifndef USER_MANAGER_SERIALIZER_H
 #define USER_MANAGER_SERIALIZER_H
@@ -32,6 +32,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 namespace serializer
 {
 user_manager::User** load( std::istream & is, user_manager::User** e );
+bool save( std::ostream & os, const user_manager::User * e );
 }
 
 #include "serializer/serializer.h"   // serializer::

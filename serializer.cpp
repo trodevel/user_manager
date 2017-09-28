@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 7925 $ $Date:: 2017-09-26 #$ $Author: serge $
+// $Revision: 7939 $ $Date:: 2017-09-28 #$ $Author: serge $
 
 #include "serializer.h"     // self
 
@@ -61,6 +61,11 @@ user_manager::User** load( std::istream & is, user_manager::User** e )
     *e =  res;
 
     return e;
+}
+
+bool save( std::ostream & os, const user_manager::User * e )
+{
+    return user_manager::Serializer::save( os, * e );
 }
 
 }

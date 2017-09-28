@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 7913 $ $Date:: 2017-09-25 #$ $Author: serge $
+// $Revision: 7939 $ $Date:: 2017-09-28 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -47,6 +47,8 @@ public:
     const User* find( user_id_t user_id ) const;
 
     const User* find( const std::string & login ) const;
+
+    bool save( std::string * error_msg, const std::string & credentials_file );
 
 private:
 

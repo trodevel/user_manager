@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 7912 $ $Date:: 2017-09-25 #$ $Author: serge $
+// $Revision: 7939 $ $Date:: 2017-09-28 #$ $Author: serge $
 
 #ifndef LIB_USER_MANAGER__TYPES_H
 #define LIB_USER_MANAGER__TYPES_H

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 7913 $ $Date:: 2017-09-25 #$ $Author: serge $
+// $Revision: 7939 $ $Date:: 2017-09-28 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -146,9 +146,41 @@ bool UserManager::load_credentials( const std::string & credentials_file )
         return false;
     }
 
-    dummy_log_info( MODULENAME, "load_credentials: loaded %d entries", map_id_to_user_.size() );
+    dummy_log_info( MODULENAME, "load_credentials: loaded %d entries from %s", map_id_to_user_.size(), credentials_file.c_str() );
 
     return true;
+}
+
+bool UserManager::save( std::string * error_msg, const std::string & credentials_file )
+{
+    MUTEX_SCOPE_LOCK( mutex_ );
+
+    std::ofstream os( credentials_file );
+
+    if( os.fail() )
+    {
+        dummy_log_warn( MODULENAME, "save: cannot open credentials file %s", credentials_file.c_str() );
+
+        * error_msg =  "cannot open file " + credentials_file;
+
+        return false;
+    }
+
+    auto res = serializer::save<true>( os, map_id_to_user_.begin(), map_id_to_user_.end() );
+
+    if( res == false )
+    {
+        dummy_log_error( MODULENAME, "save: cannot load credentials" );
+
+        * error_msg =  "cannot save data into file " + credentials_file;
+
+        return false;
+    }
+
+    dummy_log_info( MODULENAME, "save: save %d entries into %s", map_id_to_user_.size(), credentials_file.c_str() );
+
+    return true;
+
 }
 
 bool UserManager::init_login_map()
