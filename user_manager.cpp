@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 7939 $ $Date:: 2017-09-28 #$ $Author: serge $
+// $Revision: 8323 $ $Date:: 2017-11-09 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -166,7 +166,7 @@ bool UserManager::save( std::string * error_msg, const std::string & credentials
         return false;
     }
 
-    auto res = serializer::save<true>( os, map_id_to_user_.begin(), map_id_to_user_.end() );
+    auto res = serializer::save<true>( os, map_id_to_user_ );
 
     if( res == false )
     {
