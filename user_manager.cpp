@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 8323 $ $Date:: 2017-11-09 #$ $Author: serge $
+// $Revision: 9338 $ $Date:: 2018-06-08 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -82,11 +82,51 @@ bool UserManager::add( User * user, std::string & error_msg )
     return true;
 }
 
+bool UserManager::delete_user( user_id_t user_id, std::string * error_msg )
+{
+    MUTEX_SCOPE_LOCK( mutex_ );
+
+    auto it = map_id_to_user_.find( user_id );
+    if( it == map_id_to_user_.end() )
+    {
+        * error_msg   = "user id " + std::to_string( user_id ) + " not found";
+        return false;
+    }
+
+    auto user = it->second;
+
+    auto it2 = map_login_to_user_id_.find( user->login );
+    if( it2 == map_login_to_user_id_.end() )
+    {
+        * error_msg   = "corrupted: user login " + user->login + " for user id " + std::to_string( user->user_id ) + " not found";
+        return false;
+    }
+
+    map_id_to_user_.erase( it );
+    map_login_to_user_id_.erase( it2 );
+
+    delete user;
+
+    return true;
+}
+
 const User* UserManager::find( user_id_t user_id ) const
 {
     MUTEX_SCOPE_LOCK( mutex_ );
 
     return find__( user_id );
+}
+
+User* UserManager::find__( user_id_t user_id )
+{
+    auto it = map_id_to_user_.find( user_id );
+
+    if( it != map_id_to_user_.end() )
+    {
+        return it->second;
+    }
+
+    return nullptr;
 }
 
 const User* UserManager::find__( user_id_t user_id ) const
@@ -101,10 +141,8 @@ const User* UserManager::find__( user_id_t user_id ) const
     return nullptr;
 }
 
-const User* UserManager::find( const std::string & login ) const
+User* UserManager::find( const std::string & login )
 {
-    MUTEX_SCOPE_LOCK( mutex_ );
-
     auto it = map_login_to_user_id_.find( login );
 
     if( it != map_login_to_user_id_.end() )
@@ -113,6 +151,23 @@ const User* UserManager::find( const std::string & login ) const
     }
 
     return nullptr;
+}
+
+const User* UserManager::find( const std::string & login ) const
+{
+    auto it = map_login_to_user_id_.find( login );
+
+    if( it != map_login_to_user_id_.end() )
+    {
+        return find__( it->second );
+    }
+
+    return nullptr;
+}
+
+std::mutex & UserManager::get_mutex() const
+{
+    return mutex_;
 }
 
 bool UserManager::is_inited__() const

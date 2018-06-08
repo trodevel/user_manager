@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 7939 $ $Date:: 2017-09-28 #$ $Author: serge $
+// $Revision: 9338 $ $Date:: 2018-06-08 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -43,12 +43,16 @@ public:
             const std::string & credentials_file );
 
     bool add( User * user, std::string & error_msg );
+    bool delete_user( user_id_t user_id, std::string * error_msg );
 
     const User* find( user_id_t user_id ) const;
 
+    User* find( const std::string & login );
     const User* find( const std::string & login ) const;
 
     bool save( std::string * error_msg, const std::string & credentials_file );
+
+    std::mutex & get_mutex() const;
 
 private:
 
@@ -57,6 +61,7 @@ private:
 
 private:
 
+    User* find__( user_id_t user_id );
     const User* find__( user_id_t user_id ) const;
 
     bool is_inited__() const;
