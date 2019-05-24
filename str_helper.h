@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 6163 $ $Date:: 2017-03-21 #$ $Author: serge $
+// $Revision: 11597 $ $Date:: 2019-05-24 #$ $Author: serge $
 
 #ifndef USER_MANAGER_STR_HELPER_H
 #define USER_MANAGER_STR_HELPER_H
@@ -36,7 +36,8 @@ class StrHelper
 public:
     static const std::string & to_string( status_e l );
     static const std::string & to_string( gender_e l );
-    static std::string to_string( const User * l );
+    static std::string to_string( User::field_e l );
+    static std::string to_string( const User & l );
 };
 
 } // namespace user_manager

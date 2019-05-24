@@ -15,11 +15,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu->org/licenses/>.
+along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 7939 $ $Date:: 2017-09-28 #$ $Author: serge $
+// $Revision: 11597 $ $Date:: 2019-05-24 #$ $Author: serge $
 
 #include "str_helper.h"             // self
 
@@ -70,24 +70,53 @@ const std::string & StrHelper::to_string( gender_e l )
     return it->second;
 }
 
-std::string StrHelper::to_string( const User * u )
+std::string StrHelper::to_string( User::field_e l )
+{
+    typedef User::field_e   Type;
+
+    typedef std::map< Type, std::string > Map;
+    static Map m =
+    {
+        { Type:: TUPLE_VAL_STR( UNDEF ) },
+        { Type:: TUPLE_VAL_STR( GENDER ) },
+        { Type:: TUPLE_VAL_STR( TITLE ) },
+        { Type:: TUPLE_VAL_STR( FIRST_NAME ) },
+        { Type:: TUPLE_VAL_STR( LAST_NAME ) },
+        { Type:: TUPLE_VAL_STR( COMPANY_NAME ) },
+        { Type:: TUPLE_VAL_STR( EMAIL ) },
+        { Type:: TUPLE_VAL_STR( PHONE ) },
+        { Type:: TUPLE_VAL_STR( TIMEZONE ) },
+        { Type:: TUPLE_VAL_STR( ZIP ) },
+        { Type:: TUPLE_VAL_STR( COUNTRY ) },
+        { Type:: TUPLE_VAL_STR( CITY ) },
+        { Type:: TUPLE_VAL_STR( STREET ) },
+        { Type:: TUPLE_VAL_STR( HOUSE_NUMBER ) },
+        { Type:: TUPLE_VAL_STR( EAL ) },
+        { Type:: TUPLE_VAL_STR( USER_DEFINED_FIELD_ID_BASE ) },
+    };
+
+    auto it = m.find( l );
+
+    if( it == m.end() )
+        return std::to_string( l );
+
+    return it->second;
+}
+
+std::string StrHelper::to_string( const User & u )
 {
     std::ostringstream s;
 
-    s << "user_id " << u->user_id
-    << " group_id " << u->group_id
-    << " status " << to_string( u->status )
-    << " login " << u->login
-    << " password_hash " << "..."
-    << " gender " << to_string( u->gender )
-    << " name " << u->name
-    << " first_name " << u->first_name
-    << " company_name " << u->company_name
-    << " email " << u->email
-    << " email_2 " << u->email_2
-    << " phone " << u->phone
-    << " phone_2 " << u->phone_2
-    << " timezone " << u->timezone;
+    s << "user_id " << u.user_id
+    << " group_id " << u.group_id
+    << " status " << to_string( u.status )
+    << " login " << u.login
+    << " password_hash " << "...";
+
+    for( auto e : u.map_id_to_value_ )
+    {
+        s << to_string( e.first ) << " " << e.second;
+    }
 
     return s.str();
 }

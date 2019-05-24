@@ -19,13 +19,14 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11590 $ $Date:: 2019-05-23 #$ $Author: serge $
+// $Revision: 11596 $ $Date:: 2019-05-24 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
 
 #include <map>              // std::map
 #include "types.h"          // user_id_t
+#include "value.h"          // Value
 
 namespace user_manager
 {
@@ -46,6 +47,8 @@ enum class gender_e
 
 struct User
 {
+    friend class StrHelper;
+
     enum field_e
     {
         UNDEF   = 0,
@@ -66,22 +69,22 @@ struct User
         USER_DEFINED_FIELD_ID_BASE  = 1000,
     };
 
-    bool        is_existing;
+    typedef std::map<field_e,Value> MapIdToValue;
+
     user_id_t   user_id;
     group_id_t  group_id;
     status_e    status;
     std::string login;
     std::string password_hash;
 
-    gender_e    gender;
-    std::string name;
-    std::string first_name;
-    std::string company_name;
-    std::string email;
-    std::string email_2;
-    std::string phone;
-    std::string phone_2;
-    std::string timezone;
+    bool has_field( const field_e field_id ) const;
+    bool get_field( const field_e field_id, Value * res ) const;
+    bool add_field( const field_e field_id, const Value & value );
+    bool delete_field( const field_e field_id );
+
+private:
+
+    MapIdToValue map_id_to_value_;
 };
 
 } // namespace user_manager
