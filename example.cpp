@@ -14,8 +14,9 @@ user_manager::User * create_user_1()
     res->login          = "test";
     res->password_hash  = "\xf0\xf0\xf0";
 
-    res->gender         = user_manager::gender_e::MALE;
-    res->name           = "Doe";
+    res->add_field( user_manager::User::GENDER, int( user_manager::gender_e::MALE ) );
+
+    res->add_field( user_manager::User::LAST_NAME, "Doe" );
     res->first_name     = "John";
     res->company_name   = "Yoyodyne Inc.";
     res->email          = "john.doe@yoyodyne.com";

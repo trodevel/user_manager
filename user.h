@@ -19,17 +19,19 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11596 $ $Date:: 2019-05-24 #$ $Author: serge $
+// $Revision: 11614 $ $Date:: 2019-05-24 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
 
 #include <map>              // std::map
 #include "types.h"          // user_id_t
-#include "value.h"          // Value
+#include "anyvalue/value.h" // Value
 
 namespace user_manager
 {
+
+typedef anyvalue::Value Value;
 
 enum class status_e
 {
