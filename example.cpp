@@ -58,7 +58,7 @@ void test_2()
 
     std::string error_msg;
 
-    auto b = m.add( u, error_msg );
+    auto b = m.add_loaded( u, error_msg );
 
     if( b )
     {
@@ -69,7 +69,7 @@ void test_2()
         std::cout << "ERROR: cannot add user" << std::endl;
     }
 
-    b = m.add( u, error_msg );
+    b = m.add_loaded( u, error_msg );
 
     if( b == false )
     {
@@ -83,7 +83,7 @@ void test_2()
 
 void test_3( user_manager::UserManager & m )
 {
-    auto u = m.find( "testuser" );
+    auto u = m.find__unlocked( "testuser" );
 
     if( u )
     {
@@ -119,8 +119,8 @@ void test_5()
 
     std::string error_msg;
 
-    m.add( u1, error_msg );
-    m.add( u2, error_msg );
+    m.add_loaded( u1, error_msg );
+    m.add_loaded( u2, error_msg );
 
     auto b = m.save( & error_msg, "test.dat" );
 

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 7939 $ $Date:: 2017-09-28 #$ $Author: serge $
+// $Revision: 11590 $ $Date:: 2019-05-23 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -46,6 +46,27 @@ enum class gender_e
 
 struct User
 {
+    enum field_e
+    {
+        UNDEF   = 0,
+        GENDER,
+        TITLE,
+        FIRST_NAME,
+        LAST_NAME,
+        COMPANY_NAME,
+        EMAIL,
+        PHONE,
+        TIMEZONE,
+        ZIP,
+        COUNTRY,
+        CITY,
+        STREET,
+        HOUSE_NUMBER,
+        EAL,
+        USER_DEFINED_FIELD_ID_BASE  = 1000,
+    };
+
+    bool        is_existing;
     user_id_t   user_id;
     group_id_t  group_id;
     status_e    status;

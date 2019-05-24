@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 10615 $ $Date:: 2019-03-10 #$ $Author: serge $
+// $Revision: 11588 $ $Date:: 2019-05-23 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -58,7 +58,7 @@ bool UserManager::init(
     return b;
 }
 
-bool UserManager::add( User * user, std::string & error_msg )
+bool UserManager::add_loaded( User * user, std::string & error_msg )
 {
     MUTEX_SCOPE_LOCK( mutex_ );
 
@@ -141,7 +141,7 @@ const User* UserManager::find__( user_id_t user_id ) const
     return nullptr;
 }
 
-User* UserManager::find( const std::string & login )
+User* UserManager::find__unlocked( const std::string & login )
 {
     auto it = map_login_to_user_id_.find( login );
 
@@ -153,7 +153,7 @@ User* UserManager::find( const std::string & login )
     return nullptr;
 }
 
-const User* UserManager::find( const std::string & login ) const
+const User* UserManager::find__unlocked( const std::string & login ) const
 {
     auto it = map_login_to_user_id_.find( login );
 

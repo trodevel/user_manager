@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 9338 $ $Date:: 2018-06-08 #$ $Author: serge $
+// $Revision: 11588 $ $Date:: 2019-05-23 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -42,13 +42,13 @@ public:
     bool init(
             const std::string & credentials_file );
 
-    bool add( User * user, std::string & error_msg );
+    bool add_loaded( User * user, std::string & error_msg );
     bool delete_user( user_id_t user_id, std::string * error_msg );
 
     const User* find( user_id_t user_id ) const;
 
-    User* find( const std::string & login );
-    const User* find( const std::string & login ) const;
+    User* find__unlocked( const std::string & login );
+    const User* find__unlocked( const std::string & login ) const;
 
     bool save( std::string * error_msg, const std::string & credentials_file );
 
