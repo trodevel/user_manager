@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11614 $ $Date:: 2019-05-24 #$ $Author: serge $
+// $Revision: 11633 $ $Date:: 2019-05-26 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -50,6 +50,7 @@ enum class gender_e
 struct User
 {
     friend class StrHelper;
+    friend class Serializer;
 
     enum field_e
     {

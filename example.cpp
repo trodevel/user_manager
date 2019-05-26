@@ -16,14 +16,14 @@ user_manager::User * create_user_1()
 
     res->add_field( user_manager::User::GENDER, int( user_manager::gender_e::MALE ) );
 
-    res->add_field( user_manager::User::LAST_NAME, "Doe" );
-    res->first_name     = "John";
-    res->company_name   = "Yoyodyne Inc.";
-    res->email          = "john.doe@yoyodyne.com";
-    //res->email_2;
-    res->phone          = "+1234567890";
-    //res->phone_2;
-    res->timezone       = "Europe/Berlin";
+    res->add_field( user_manager::User::LAST_NAME,      "Doe" );
+    res->add_field( user_manager::User::FIRST_NAME,     "John" );
+    res->add_field( user_manager::User::COMPANY_NAME,   "Yoyodyne Inc." );
+    res->add_field( user_manager::User::EMAIL,          "john.doe@yoyodyne.com" );
+    //res->email_2 );
+    res->add_field( user_manager::User::PHONE,          "+1234567890" );
+    //res->phone_2 );
+    res->add_field( user_manager::User::TIMEZONE,       "Europe/Berlin" );
 
     return res;
 }
@@ -38,15 +38,16 @@ user_manager::User * create_user_2()
     res->login          = "test2";
     res->password_hash  = "\xae\xae\xae";
 
-    res->gender         = user_manager::gender_e::FEMALE;
-    res->name           = "Bowie";
-    res->first_name     = "Doris";
-    res->company_name   = "Yoyodyne Inc.";
-    res->email          = "doris.bowie@yoyodyne.com";
-    //res->email_2;
-    res->phone          = "+9876542310";
-    res->phone_2        = "+877777777";
-    res->timezone       = "Europe/London";
+    static const int PHONE_2    = user_manager::User::USER_DEFINED_FIELD_ID_BASE + 1;
+
+    res->add_field( user_manager::User::GENDER,         int( user_manager::gender_e::FEMALE ) );
+    res->add_field( user_manager::User::LAST_NAME,      "Bowie" );
+    res->add_field( user_manager::User::FIRST_NAME,     "Doris" );
+    res->add_field( user_manager::User::COMPANY_NAME,   "Yoyodyne Inc." );
+    res->add_field( user_manager::User::EMAIL,          "doris.bowie@yoyodyne.com" );
+    res->add_field( user_manager::User::PHONE,          "+9876542310" );
+    res->add_field( user_manager::User::field_e(PHONE_2),   "+877777777" );
+    res->add_field( user_manager::User::TIMEZONE,       "Europe/London" );
 
     return res;
 }
@@ -88,7 +89,7 @@ void test_3( user_manager::UserManager & m )
 
     if( u )
     {
-        std::cout << "OK: found user: " << user_manager::StrHelper::to_string( u ) << std::endl;
+        std::cout << "OK: found user: " << user_manager::StrHelper::to_string( * u ) << std::endl;
     }
     else
     {
@@ -102,7 +103,7 @@ void test_4( user_manager::UserManager & m )
 
     if( u )
     {
-        std::cout << "OK: found user: " << user_manager::StrHelper::to_string( u ) << std::endl;
+        std::cout << "OK: found user: " << user_manager::StrHelper::to_string( * u ) << std::endl;
     }
     else
     {

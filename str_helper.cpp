@@ -19,11 +19,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11597 $ $Date:: 2019-05-24 #$ $Author: serge $
+// $Revision: 11644 $ $Date:: 2019-05-26 #$ $Author: serge $
 
 #include "str_helper.h"             // self
 
 #include <sstream>                  // std::ostringstream
+
+#include "anyvalue/str_helper.h"    // anyvalue::StrHelper
 
 namespace user_manager
 {
@@ -98,7 +100,7 @@ std::string StrHelper::to_string( User::field_e l )
     auto it = m.find( l );
 
     if( it == m.end() )
-        return std::to_string( l );
+        return "ID_" + std::to_string( l );
 
     return it->second;
 }
@@ -115,7 +117,7 @@ std::string StrHelper::to_string( const User & u )
 
     for( auto e : u.map_id_to_value_ )
     {
-        s << to_string( e.first ) << " " << e.second;
+        s << to_string( e.first ) << " " << anyvalue::StrHelper::to_string( e.second ) << " ";
     }
 
     return s.str();

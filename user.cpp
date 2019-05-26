@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11594 $ $Date:: 2019-05-24 #$ $Author: serge $
+// $Revision: 11640 $ $Date:: 2019-05-26 #$ $Author: serge $
 
 #include "user.h"           // self
 
@@ -54,6 +54,3 @@ bool User::delete_field( const field_e field_id )
 }
 
 } // namespace user_manager
-
-
-#endif // USER_MANAGER_USER_H
