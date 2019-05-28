@@ -4,15 +4,13 @@
 #include "user_manager.h"       //
 #include "str_helper.h"         // StrHelper
 
-user_manager::User * create_user_1()
+user_manager::User * create_user_1( user_manager::UserManager * um, std::string * error_msg )
 {
-    auto res = new user_manager::User;
+    user_manager::user_id_t id;
 
-    res->user_id        = 1;
-    res->group_id       = 1;
-    res->status         = user_manager::status_e::ACTIVE;
-    res->login          = "test";
-    res->password_hash  = "\xf0\xf0\xf0";
+    um->create_and_add_user( 1, user_manager::status_e::ACTIVE, "test", "\xf0\xf0\xf0", & id, error_msg );
+
+    auto res = um->find__unlocked( id );
 
     res->add_field( user_manager::User::GENDER, int( user_manager::gender_e::MALE ) );
 
@@ -28,15 +26,13 @@ user_manager::User * create_user_1()
     return res;
 }
 
-user_manager::User * create_user_2()
+user_manager::User * create_user_2( user_manager::UserManager * um, std::string * error_msg )
 {
-    auto res = new user_manager::User;
+    user_manager::user_id_t id;
 
-    res->user_id        = 2;
-    res->group_id       = 1;
-    res->status         = user_manager::status_e::ACTIVE;
-    res->login          = "test2";
-    res->password_hash  = "\xae\xae\xae";
+    um->create_and_add_user( 1, user_manager::status_e::ACTIVE, "test2", "\xae\xae\xae", & id, error_msg );
+
+    auto res = um->find__unlocked( id );
 
     static const int PHONE_2    = user_manager::User::USER_DEFINED_FIELD_ID_BASE + 1;
 
@@ -52,15 +48,16 @@ user_manager::User * create_user_2()
     return res;
 }
 
+#ifdef XXX
 void test_2()
 {
     user_manager::UserManager m;
 
-    auto u = create_user_1();
-
     std::string error_msg;
 
-    auto b = m.add_loaded( u, error_msg );
+    auto u = create_user_1( & m, & error_msg );
+
+    auto b = m.add_loaded( u, & error_msg );
 
     if( b )
     {
@@ -71,7 +68,7 @@ void test_2()
         std::cout << "ERROR: cannot add user" << std::endl;
     }
 
-    b = m.add_loaded( u, error_msg );
+    b = m.add_loaded( u, & error_msg );
 
     if( b == false )
     {
@@ -82,6 +79,7 @@ void test_2()
         std::cout << "ERROR: duplicated user was added" << std::endl;
     }
 }
+#endif // XXX
 
 void test_3( user_manager::UserManager & m )
 {
@@ -99,7 +97,7 @@ void test_3( user_manager::UserManager & m )
 
 void test_4( user_manager::UserManager & m )
 {
-    auto u = m.find( 2849000613 );
+    auto u = m.find__unlocked( 2849000613 );
 
     if( u )
     {
@@ -116,13 +114,10 @@ void test_5()
 {
     user_manager::UserManager m;
 
-    auto u1 = create_user_1();
-    auto u2 = create_user_2();
-
     std::string error_msg;
 
-    m.add_loaded( u1, error_msg );
-    m.add_loaded( u2, error_msg );
+    auto u1 = create_user_1( & m, & error_msg );
+    auto u2 = create_user_2( & m, & error_msg );
 
     auto b = m.save( & error_msg, "test.dat" );
 
@@ -152,7 +147,7 @@ int main( int argc, const char* argv[] )
         return -1;
     }
 
-    test_2();
+    //test_2();
     test_3( m );
     test_4( m );
     test_5();

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11633 $ $Date:: 2019-05-26 #$ $Author: serge $
+// $Revision: 11647 $ $Date:: 2019-05-28 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -79,6 +79,7 @@ struct User
     status_e    status;
     std::string login;
     std::string password_hash;
+    uint32_t    creation_time;
 
     bool has_field( const field_e field_id ) const;
     bool get_field( const field_e field_id, Value * res ) const;

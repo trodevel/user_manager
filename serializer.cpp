@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11641 $ $Date:: 2019-05-26 #$ $Author: serge $
+// $Revision: 11647 $ $Date:: 2019-05-28 #$ $Author: serge $
 
 #include "serializer.h"     // self
 
@@ -229,6 +229,8 @@ User* Serializer::load_3( std::istream & is, User* res )
         return nullptr;
     if( serializer::load( is, & res->password_hash ) == nullptr )
         return nullptr;
+    if( serializer::load( is, & res->creation_time ) == nullptr )
+        return nullptr;
 
     res->status         = static_cast<status_e>( status );
     res->password_hash  = utils::unhex_string( res->password_hash );
@@ -258,6 +260,7 @@ bool Serializer::save( std::ostream & os, const User & e )
     b &= serializer::save( os, static_cast<unsigned>( e.status ) );
     b &= serializer::save( os, e.login );
     b &= serializer::save( os, utils::hex_string( e.password_hash ) );
+    b &= serializer::save( os, e.creation_time );
 
     b &= serializer::save( os, e.map_id_to_value_ );
 

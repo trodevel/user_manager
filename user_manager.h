@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11588 $ $Date:: 2019-05-23 #$ $Author: serge $
+// $Revision: 11660 $ $Date:: 2019-05-28 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -28,6 +28,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <map>              // std::map
 
 #include "user.h"           // User
+
+#include "utils/request_id_gen.h"   // utils::RequestIdGen
 
 namespace user_manager
 {
@@ -42,10 +44,17 @@ public:
     bool init(
             const std::string & credentials_file );
 
-    bool add_loaded( User * user, std::string & error_msg );
+    bool create_and_add_user(
+            group_id_t          group_id,
+            status_e            status,
+            const std::string   & login,
+            const std::string   & password_hash,
+            user_id_t           * user_id,
+            std::string         * error_msg );
     bool delete_user( user_id_t user_id, std::string * error_msg );
 
-    const User* find( user_id_t user_id ) const;
+    User* find__unlocked( user_id_t user_id );
+    const User* find__unlocked( user_id_t user_id ) const;
 
     User* find__unlocked( const std::string & login );
     const User* find__unlocked( const std::string & login ) const;
@@ -60,6 +69,8 @@ private:
     typedef std::map<std::string,user_id_t> MapLoginToUserId;
 
 private:
+
+    bool add_loaded( User * user, std::string * error_msg );
 
     User* find__( user_id_t user_id );
     const User* find__( user_id_t user_id ) const;
@@ -77,6 +88,8 @@ private:
 
     MapUserIdToUser             map_id_to_user_;
     MapLoginToUserId            map_login_to_user_id_;
+
+    utils::RequestIdGen         req_id_gen_;
 };
 
 } // namespace user_manager

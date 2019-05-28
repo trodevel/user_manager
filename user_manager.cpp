@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11588 $ $Date:: 2019-05-23 #$ $Author: serge $
+// $Revision: 11660 $ $Date:: 2019-05-28 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -28,7 +28,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "utils/mutex_helper.h"         // MUTEX_SCOPE_LOCK
 #include "utils/dummy_logger.h"         // dummy_log
 #include "utils/utils_assert.h"               // ASSERT
+#include "utils/chrono_epoch.h"         // to_epoch()
 
+#include "init_user.h"                  // init_User
 #include "serializer.h"                 // serializer::load
 
 #define MODULENAME      "UserManager"
@@ -53,26 +55,68 @@ bool UserManager::init(
 {
     MUTEX_SCOPE_LOCK( mutex_ );
 
+    req_id_gen_.init( 1, 1 );
+
     auto b = load_credentials( credentials_file );
 
     return b;
 }
 
-bool UserManager::add_loaded( User * user, std::string & error_msg )
+bool UserManager::create_and_add_user(
+        group_id_t          group_id,
+        status_e            status,
+        const std::string   & login,
+        const std::string   & password_hash,
+        user_id_t           * user_id,
+        std::string         * error_msg )
+{
+    MUTEX_SCOPE_LOCK( mutex_ );
+
+    auto c = map_login_to_user_id_.count( login );
+
+    if( c > 0 )
+    {
+        * error_msg = "login " + login + " is already used";
+
+        dummy_log_error( MODULENAME, "create_and_add_user: cannot add user, login %s already exists", login.c_str() );
+
+        return false;
+    }
+
+    auto id = req_id_gen_.get_next_request_id();
+
+    auto user = new User;
+
+    init_User( user, id, group_id, status, login, password_hash, utils::to_epoch( std::chrono::system_clock::now() ) );
+
+    auto b = map_id_to_user_.insert( std::make_pair( user->user_id, user ) ).second;
+
+    assert( b );    // should never happen
+
+    map_login_to_user_id_.insert( std::make_pair( user->login, user->user_id ) );
+
+    * user_id = id;
+
+    dummy_log_info( MODULENAME, "create_and_add_user: added user id %u, login %s", id, login.c_str() );
+
+    return true;
+}
+
+bool UserManager::add_loaded( User * user, std::string * error_msg )
 {
     MUTEX_SCOPE_LOCK( mutex_ );
 
     auto it = map_id_to_user_.find( user->user_id );
     if( it != map_id_to_user_.end() )
     {
-        error_msg   = "user id " + std::to_string( user->user_id ) + " already exists";
+        * error_msg   = "user id " + std::to_string( user->user_id ) + " already exists";
         return false;
     }
 
     auto it2 = map_login_to_user_id_.find( user->login );
     if( it2 != map_login_to_user_id_.end() )
     {
-        error_msg   = "user login " + user->login + " (with user id " + std::to_string( user->user_id ) + ") already exists";
+        * error_msg   = "user login " + user->login + " (with user id " + std::to_string( user->user_id ) + ") already exists";
         return false;
     }
 
@@ -110,10 +154,13 @@ bool UserManager::delete_user( user_id_t user_id, std::string * error_msg )
     return true;
 }
 
-const User* UserManager::find( user_id_t user_id ) const
+User* UserManager::find__unlocked( user_id_t user_id )
 {
-    MUTEX_SCOPE_LOCK( mutex_ );
+    return find__( user_id );
+}
 
+const User* UserManager::find__unlocked( user_id_t user_id ) const
+{
     return find__( user_id );
 }
 
