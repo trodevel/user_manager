@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11637 $ $Date:: 2019-05-26 #$ $Author: serge $
+// $Revision: 11664 $ $Date:: 2019-05-29 #$ $Author: serge $
 
 #ifndef USER_MANAGER_SERIALIZER_H
 #define USER_MANAGER_SERIALIZER_H
@@ -43,6 +43,8 @@ bool save( std::ostream & os, const user_manager::User * e );
 namespace user_manager
 {
 
+class UserManager;
+
 class Serializer: public serializer::VersionableLoaderT<Serializer>
 {
     friend serializer::VersionableLoaderT<Serializer>;
@@ -53,6 +55,8 @@ public:
 
     static User::field_e* load( std::istream & is, User::field_e* e );
     static bool save( std::ostream & os, const User::field_e & e );
+
+    static bool save( std::ostream & os, const UserManager & e );
 
 private:
 

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11660 $ $Date:: 2019-05-28 #$ $Author: serge $
+// $Revision: 11669 $ $Date:: 2019-05-29 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -29,6 +29,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "utils/dummy_logger.h"         // dummy_log
 #include "utils/utils_assert.h"               // ASSERT
 #include "utils/chrono_epoch.h"         // to_epoch()
+#include "utils/rename_and_backup.h"    // utils::rename_and_backup
 
 #include "init_user.h"                  // init_User
 #include "serializer.h"                 // serializer::load
@@ -253,33 +254,47 @@ bool UserManager::load_credentials( const std::string & credentials_file )
     return true;
 }
 
-bool UserManager::save( std::string * error_msg, const std::string & credentials_file )
+bool UserManager::save( std::string * error_msg, const std::string & filename ) const
 {
     MUTEX_SCOPE_LOCK( mutex_ );
 
-    std::ofstream os( credentials_file );
+    auto temp_name  = filename + ".tmp";
+
+    auto b = save_intern( error_msg, temp_name );
+
+    if( b == false )
+        return false;
+
+    utils::rename_and_backup( temp_name, filename );
+
+    return true;
+}
+
+bool UserManager::save_intern( std::string * error_msg, const std::string & filename ) const
+{
+    std::ofstream os( filename );
 
     if( os.fail() )
     {
-        dummy_log_warn( MODULENAME, "save: cannot open credentials file %s", credentials_file.c_str() );
+        dummy_log_error( MODULENAME, "save_intern: cannot open credentials file %s", filename.c_str() );
 
-        * error_msg =  "cannot open file " + credentials_file;
+        * error_msg =  "cannot open file " + filename;
 
         return false;
     }
 
-    auto res = serializer::save<true>( os, map_id_to_user_ );
+    auto res = Serializer::save( os, * this );
 
     if( res == false )
     {
-        dummy_log_error( MODULENAME, "save: cannot load credentials" );
+        dummy_log_error( MODULENAME, "save_intern: cannot save credentials into file %s", filename.c_str()  );
 
-        * error_msg =  "cannot save data into file " + credentials_file;
+        * error_msg =  "cannot save data into file " + filename;
 
         return false;
     }
 
-    dummy_log_info( MODULENAME, "save: save %d entries into %s", map_id_to_user_.size(), credentials_file.c_str() );
+    dummy_log_info( MODULENAME, "save: save %d entries into %s", map_id_to_user_.size(), filename.c_str() );
 
     return true;
 

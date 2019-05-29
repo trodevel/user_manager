@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11660 $ $Date:: 2019-05-28 #$ $Author: serge $
+// $Revision: 11667 $ $Date:: 2019-05-29 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -36,6 +36,8 @@ namespace user_manager
 
 class UserManager
 {
+    friend class Serializer;
+
 public:
 
     UserManager();
@@ -59,7 +61,7 @@ public:
     User* find__unlocked( const std::string & login );
     const User* find__unlocked( const std::string & login ) const;
 
-    bool save( std::string * error_msg, const std::string & credentials_file );
+    bool save( std::string * error_msg, const std::string & credentials_file ) const;
 
     std::mutex & get_mutex() const;
 
@@ -69,6 +71,8 @@ private:
     typedef std::map<std::string,user_id_t> MapLoginToUserId;
 
 private:
+
+    bool save_intern( std::string * error_msg, const std::string & filename ) const;
 
     bool add_loaded( User * user, std::string * error_msg );
 

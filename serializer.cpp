@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11647 $ $Date:: 2019-05-28 #$ $Author: serge $
+// $Revision: 11665 $ $Date:: 2019-05-29 #$ $Author: serge $
 
 #include "serializer.h"     // self
 
@@ -28,6 +28,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "anyvalue/serializer.h"        // save( ..., anyvalue::Value & )
 #include "serializer/serializer.h"      // serializer::
 #include "utils/hex_codec.h"            // utils::unhex_string
+
+#include "user_manager.h"               // UserManager
 
 namespace serializer
 {
@@ -284,5 +286,23 @@ bool Serializer::save( std::ostream & os, const User::field_e & e )
     return serializer::save( os, static_cast<unsigned>( e ) );
 }
 
+bool Serializer::save( std::ostream & os, const UserManager & e )
+{
+    static const unsigned int VERSION = 2;
+
+    auto b = serializer::save( os, VERSION );
+
+    if( b == false )
+        return false;
+
+    b &= serializer::save( os, e.req_id_gen_.get_last_request_id() );
+
+    for( auto & p : e.map_id_to_user_ )
+    {
+        b &= save( os, * p.second );
+    }
+
+    return b;
+}
 
 } // namespace user_manager
