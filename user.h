@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11647 $ $Date:: 2019-05-28 #$ $Author: serge $
+// $Revision: 11685 $ $Date:: 2019-05-30 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -37,7 +37,7 @@ enum class status_e
 {
     INACTIVE    = 0,
     ACTIVE      = 1,
-    DELETED     = 2,
+    WAITING_CONFIRMATION    = 2,
 };
 
 enum class gender_e
@@ -55,6 +55,7 @@ struct User
     enum field_e
     {
         UNDEF   = 0,
+        STATUS,
         GENDER,
         TITLE,
         FIRST_NAME,
@@ -76,7 +77,7 @@ struct User
 
     user_id_t   user_id;
     group_id_t  group_id;
-    status_e    status;
+    bool        is_open;
     std::string login;
     std::string password_hash;
     uint32_t    creation_time;

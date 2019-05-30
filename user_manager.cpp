@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11669 $ $Date:: 2019-05-29 #$ $Author: serge $
+// $Revision: 11687 $ $Date:: 2019-05-30 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -52,20 +52,19 @@ UserManager::~UserManager()
 }
 
 bool UserManager::init(
-        const std::string   & credentials_file )
+        const std::string   & filename )
 {
     MUTEX_SCOPE_LOCK( mutex_ );
 
     req_id_gen_.init( 1, 1 );
 
-    auto b = load_credentials( credentials_file );
+    auto b = load_intern( filename );
 
     return b;
 }
 
 bool UserManager::create_and_add_user(
         group_id_t          group_id,
-        status_e            status,
         const std::string   & login,
         const std::string   & password_hash,
         user_id_t           * user_id,
@@ -88,7 +87,7 @@ bool UserManager::create_and_add_user(
 
     auto user = new User;
 
-    init_User( user, id, group_id, status, login, password_hash, utils::to_epoch( std::chrono::system_clock::now() ) );
+    init_User( user, id, group_id, login, password_hash, utils::to_epoch( std::chrono::system_clock::now() ) );
 
     auto b = map_id_to_user_.insert( std::make_pair( user->user_id, user ) ).second;
 
@@ -99,30 +98,6 @@ bool UserManager::create_and_add_user(
     * user_id = id;
 
     dummy_log_info( MODULENAME, "create_and_add_user: added user id %u, login %s", id, login.c_str() );
-
-    return true;
-}
-
-bool UserManager::add_loaded( User * user, std::string * error_msg )
-{
-    MUTEX_SCOPE_LOCK( mutex_ );
-
-    auto it = map_id_to_user_.find( user->user_id );
-    if( it != map_id_to_user_.end() )
-    {
-        * error_msg   = "user id " + std::to_string( user->user_id ) + " already exists";
-        return false;
-    }
-
-    auto it2 = map_login_to_user_id_.find( user->login );
-    if( it2 != map_login_to_user_id_.end() )
-    {
-        * error_msg   = "user login " + user->login + " (with user id " + std::to_string( user->user_id ) + ") already exists";
-        return false;
-    }
-
-    map_id_to_user_.insert( std::make_pair( user->user_id, user ) );
-    map_login_to_user_id_.insert( std::make_pair( user->login, user->user_id ) );
 
     return true;
 }
@@ -223,33 +198,37 @@ bool UserManager::is_inited__() const
     return true;
 }
 
-bool UserManager::load_credentials( const std::string & credentials_file )
+bool UserManager::load_intern( const std::string & filename )
 {
-    std::ifstream is( credentials_file );
+    std::ifstream is( filename );
 
     if( is.fail() )
     {
-        dummy_log_warn( MODULENAME, "load_credentials: cannot open credentials file %s", credentials_file.c_str() );
+        dummy_log_warn( MODULENAME, "load_intern: cannot open credentials file %s", filename.c_str() );
         return false;
     }
 
-    auto res = serializer::load( is, & map_id_to_user_ );
+    Status status;
+
+    auto res = Serializer::load( is, & status );
 
     if( res == nullptr )
     {
-        dummy_log_error( MODULENAME, "load_credentials: cannot load credentials" );
+        dummy_log_error( MODULENAME, "load_intern: cannot load credentials" );
         return false;
     }
 
-    auto b = init_login_map();
+    std::string error_msg;
+
+    auto b = init_from_status( & error_msg, status );
 
     if( b == false )
     {
-        dummy_log_error( MODULENAME, "load_credentials: cannot init login map, duplicate logins found" );
+        dummy_log_error( MODULENAME, "load_intern: cannot init login map: %s", error_msg.c_str() );
         return false;
     }
 
-    dummy_log_info( MODULENAME, "load_credentials: loaded %d entries from %s", map_id_to_user_.size(), credentials_file.c_str() );
+    dummy_log_info( MODULENAME, "load_intern: loaded %d entries from %s, last id %u", map_id_to_user_.size(), filename.c_str(), status.last_id );
 
     return true;
 }
@@ -283,7 +262,11 @@ bool UserManager::save_intern( std::string * error_msg, const std::string & file
         return false;
     }
 
-    auto res = Serializer::save( os, * this );
+    Status status;
+
+    get_status( & status );
+
+    auto res = Serializer::save( os, status );
 
     if( res == false )
     {
@@ -297,17 +280,44 @@ bool UserManager::save_intern( std::string * error_msg, const std::string & file
     dummy_log_info( MODULENAME, "save: save %d entries into %s", map_id_to_user_.size(), filename.c_str() );
 
     return true;
-
 }
 
-bool UserManager::init_login_map()
+void UserManager::get_status( Status * res ) const
 {
+    res->last_id   = req_id_gen_.get_last_request_id();
+
+    for( auto & e : map_id_to_user_ )
+    {
+        res->users.push_back( e.second );
+    }
+}
+
+bool UserManager::init_from_status( std::string * error_msg, const Status & status )
+{
+    req_id_gen_.init( status.last_id, 1 );
+
+    map_id_to_user_.clear();
+
+    for( auto & e : status.users )
+    {
+        auto b = map_id_to_user_.insert( std::make_pair( e->user_id, e ) ).second;
+
+        if( b == false )
+        {
+            * error_msg = "duplicate user id " + std::to_string( e->user_id );
+
+            return false;
+        }
+    }
+
     for( auto e : map_id_to_user_ )
     {
         auto b = map_login_to_user_id_.insert( std::make_pair( e.second->login, e.first ) ).second;
 
         if( b == false )
         {
+            * error_msg = "duplicate login " + e.second->login + ", user id " + std::to_string( e.first );
+
             return false;
         }
     }

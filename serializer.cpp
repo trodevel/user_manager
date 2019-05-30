@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11665 $ $Date:: 2019-05-29 #$ $Author: serge $
+// $Revision: 11685 $ $Date:: 2019-05-30 #$ $Author: serge $
 
 #include "serializer.h"     // self
 
@@ -29,7 +29,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "serializer/serializer.h"      // serializer::
 #include "utils/hex_codec.h"            // utils::unhex_string
 
-#include "user_manager.h"               // UserManager
+#include "user_manager.h"               // Status
 
 namespace serializer
 {
@@ -88,65 +88,8 @@ namespace user_manager
 
 User* Serializer::load_1( std::istream & is, User* res )
 {
-    if( res == nullptr )
-        throw std::invalid_argument( "Serializer::load: User is null" );
-
-    uint32_t    status;
-    std::string login;
-    std::string password_hash;
-
-    int         gender;
-    std::string name;
-    std::string first_name;
-    std::string company_name;
-    std::string email;
-    std::string email_2;
-    std::string phone;
-    std::string phone_2;
-
-    if( serializer::load( is, & res->user_id ) == nullptr )
-        return nullptr;
-    if( serializer::load( is, & res->group_id ) == nullptr )
-        return nullptr;
-    if( serializer::load( is, & status ) == nullptr )
-        return nullptr;
-    if( serializer::load( is, & res->login ) == nullptr )
-        return nullptr;
-    if( serializer::load( is, & res->password_hash ) == nullptr )
-        return nullptr;
-    if( serializer::load( is, & gender ) == nullptr )
-        return nullptr;
-    if( serializer::load_enc( is, & name ) == nullptr )
-        return nullptr;
-    if( serializer::load_enc( is, & first_name ) == nullptr )
-        return nullptr;
-    if( serializer::load_enc( is, & company_name ) == nullptr )
-        return nullptr;
-    if( serializer::load_enc( is, & email ) == nullptr )
-        return nullptr;
-    if( serializer::load_enc( is, & email_2 ) == nullptr )
-        return nullptr;
-    if( serializer::load_enc( is, & phone ) == nullptr )
-        return nullptr;
-    if( serializer::load_enc( is, & phone_2 ) == nullptr )
-        return nullptr;
-
-    res->status         = static_cast<status_e>( status );
-    res->password_hash  = utils::unhex_string( res->password_hash );
-
-    static const int EMAIL_2    = user_manager::User::USER_DEFINED_FIELD_ID_BASE + 1;
-    static const int PHONE_2    = user_manager::User::USER_DEFINED_FIELD_ID_BASE + 2;
-
-    res->add_field( user_manager::User::GENDER,             gender );
-    res->add_field( user_manager::User::LAST_NAME,          name );
-    res->add_field( user_manager::User::FIRST_NAME,         first_name );
-    res->add_field( user_manager::User::COMPANY_NAME,       company_name );
-    res->add_field( user_manager::User::EMAIL,              email );
-    res->add_field( user_manager::User::field_e(EMAIL_2),   email_2 );
-    res->add_field( user_manager::User::PHONE,              phone );
-    res->add_field( user_manager::User::field_e(PHONE_2),   phone_2 );
-
-    return res;
+    throw std::invalid_argument( "Serializer::load: deprecated" );
+    return nullptr;
 }
 
 User* Serializer::load_2( std::istream & is, User* res )
@@ -154,7 +97,7 @@ User* Serializer::load_2( std::istream & is, User* res )
     if( res == nullptr )
         throw std::invalid_argument( "Serializer::load: res must not be null" );
 
-    uint32_t    status;
+    int         status;
 
     int         gender;
     std::string name;
@@ -195,12 +138,14 @@ User* Serializer::load_2( std::istream & is, User* res )
     if( serializer::load_enc( is, & timezone ) == nullptr )
         return nullptr;
 
-    res->status         = static_cast<status_e>( status );
     res->password_hash  = utils::unhex_string( res->password_hash );
 
     static const int EMAIL_2    = user_manager::User::USER_DEFINED_FIELD_ID_BASE + 1;
     static const int PHONE_2    = user_manager::User::USER_DEFINED_FIELD_ID_BASE + 2;
 
+    res->is_open    = ( static_cast<status_e>( status ) == status_e::WAITING_CONFIRMATION ) ? false : true;
+
+    res->add_field( user_manager::User::STATUS,             status );
     res->add_field( user_manager::User::GENDER,             gender );
     res->add_field( user_manager::User::LAST_NAME,          name );
     res->add_field( user_manager::User::FIRST_NAME,         first_name );
@@ -219,13 +164,11 @@ User* Serializer::load_3( std::istream & is, User* res )
     if( res == nullptr )
         throw std::invalid_argument( "Serializer::load: res must not be null" );
 
-    uint32_t    status;
-
     if( serializer::load( is, & res->user_id ) == nullptr )
         return nullptr;
     if( serializer::load( is, & res->group_id ) == nullptr )
         return nullptr;
-    if( serializer::load( is, & status ) == nullptr )
+    if( serializer::load( is, & res->is_open ) == nullptr )
         return nullptr;
     if( serializer::load( is, & res->login ) == nullptr )
         return nullptr;
@@ -234,7 +177,6 @@ User* Serializer::load_3( std::istream & is, User* res )
     if( serializer::load( is, & res->creation_time ) == nullptr )
         return nullptr;
 
-    res->status         = static_cast<status_e>( status );
     res->password_hash  = utils::unhex_string( res->password_hash );
 
     if( serializer::load( is, & res->map_id_to_value_ ) == nullptr )
@@ -259,7 +201,7 @@ bool Serializer::save( std::ostream & os, const User & e )
 
     b &= serializer::save( os, e.user_id );
     b &= serializer::save( os, e.group_id );
-    b &= serializer::save( os, static_cast<unsigned>( e.status ) );
+    b &= serializer::save( os, e.is_open );
     b &= serializer::save( os, e.login );
     b &= serializer::save( os, utils::hex_string( e.password_hash ) );
     b &= serializer::save( os, e.creation_time );
@@ -286,7 +228,49 @@ bool Serializer::save( std::ostream & os, const User::field_e & e )
     return serializer::save( os, static_cast<unsigned>( e ) );
 }
 
-bool Serializer::save( std::ostream & os, const UserManager & e )
+Status* Serializer::load_1( std::istream & is, Status* res )
+{
+    if( res == nullptr )
+        throw std::invalid_argument( "Serializer::load: res must not be null" );
+
+    std::map<user_id_t,User*>   map;
+
+    if( serializer::load( is, & map ) == nullptr )
+        return nullptr;
+
+    uint32_t last_id    = 0;
+
+    for( auto & p : map )
+    {
+        res->users.push_back( p.second );
+
+        last_id = std::max( last_id, p.first );
+    }
+
+    res->last_id    = last_id;
+
+    return res;
+}
+
+Status* Serializer::load_2( std::istream & is, Status* res )
+{
+    if( res == nullptr )
+        throw std::invalid_argument( "Serializer::load: res must not be null" );
+
+    if( serializer::load( is, & res->last_id ) == nullptr )
+        return nullptr;
+    if( serializer::load( is, & res->users ) == nullptr )
+        return nullptr;
+
+    return res;
+}
+
+Status* Serializer::load( std::istream & is, Status* e )
+{
+    return load_t_1_2( is, e );
+}
+
+bool Serializer::save( std::ostream & os, const Status & e )
 {
     static const unsigned int VERSION = 2;
 
@@ -295,12 +279,9 @@ bool Serializer::save( std::ostream & os, const UserManager & e )
     if( b == false )
         return false;
 
-    b &= serializer::save( os, e.req_id_gen_.get_last_request_id() );
+    b &= serializer::save( os, e.last_id );
 
-    for( auto & p : e.map_id_to_user_ )
-    {
-        b &= save( os, * p.second );
-    }
+    b &= serializer::save<true>( os, e.users );
 
     return b;
 }

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11667 $ $Date:: 2019-05-29 #$ $Author: serge $
+// $Revision: 11685 $ $Date:: 2019-05-30 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -28,6 +28,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <map>              // std::map
 
 #include "user.h"           // User
+#include "status.h"         // Status
 
 #include "utils/request_id_gen.h"   // utils::RequestIdGen
 
@@ -44,11 +45,10 @@ public:
     ~UserManager();
 
     bool init(
-            const std::string & credentials_file );
+            const std::string & filename );
 
     bool create_and_add_user(
             group_id_t          group_id,
-            status_e            status,
             const std::string   & login,
             const std::string   & password_hash,
             user_id_t           * user_id,
@@ -61,7 +61,7 @@ public:
     User* find__unlocked( const std::string & login );
     const User* find__unlocked( const std::string & login ) const;
 
-    bool save( std::string * error_msg, const std::string & credentials_file ) const;
+    bool save( std::string * error_msg, const std::string & filename ) const;
 
     std::mutex & get_mutex() const;
 
@@ -72,17 +72,16 @@ private:
 
 private:
 
-    bool save_intern( std::string * error_msg, const std::string & filename ) const;
-
-    bool add_loaded( User * user, std::string * error_msg );
-
     User* find__( user_id_t user_id );
     const User* find__( user_id_t user_id ) const;
 
-    bool is_inited__() const;
+    bool save_intern( std::string * error_msg, const std::string & filename ) const;
+    bool load_intern( const std::string & filename );
 
-    bool load_credentials( const std::string & credentials_file );
-    bool init_login_map();
+    void get_status( Status * res ) const;
+    bool init_from_status( std::string * error_msg, const Status & status );
+
+    bool is_inited__() const;
 
 private:
     mutable std::mutex          mutex_;

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11664 $ $Date:: 2019-05-29 #$ $Author: serge $
+// $Revision: 11673 $ $Date:: 2019-05-30 #$ $Author: serge $
 
 #ifndef USER_MANAGER_SERIALIZER_H
 #define USER_MANAGER_SERIALIZER_H
@@ -30,6 +30,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "serializer/versionable_loader_t.h"        // serializer::VersionableLoaderT
 #include "user.h"           // User
+#include "status.h"         // Status
 
 namespace serializer
 {
@@ -43,8 +44,6 @@ bool save( std::ostream & os, const user_manager::User * e );
 namespace user_manager
 {
 
-class UserManager;
-
 class Serializer: public serializer::VersionableLoaderT<Serializer>
 {
     friend serializer::VersionableLoaderT<Serializer>;
@@ -56,13 +55,17 @@ public:
     static User::field_e* load( std::istream & is, User::field_e* e );
     static bool save( std::ostream & os, const User::field_e & e );
 
-    static bool save( std::ostream & os, const UserManager & e );
+    static Status* load( std::istream & is, Status* e );
+    static bool save( std::ostream & os, const Status & e );
 
 private:
 
     static User* load_1( std::istream & is, User* e );
     static User* load_2( std::istream & is, User* e );
     static User* load_3( std::istream & is, User* e );
+
+    static Status* load_1( std::istream & is, Status* e );
+    static Status* load_2( std::istream & is, Status* e );
 };
 
 } // namespace user_manager

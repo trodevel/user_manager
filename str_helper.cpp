@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11644 $ $Date:: 2019-05-26 #$ $Author: serge $
+// $Revision: 11685 $ $Date:: 2019-05-30 #$ $Author: serge $
 
 #include "str_helper.h"             // self
 
@@ -39,7 +39,7 @@ const std::string & StrHelper::to_string( status_e l )
     {
         { status_e:: TUPLE_VAL_STR( INACTIVE ) },
         { status_e:: TUPLE_VAL_STR( ACTIVE ) },
-        { status_e:: TUPLE_VAL_STR( DELETED ) },
+        { status_e:: TUPLE_VAL_STR( WAITING_CONFIRMATION ) },
     };
 
     auto it = m.find( l );
@@ -111,7 +111,7 @@ std::string StrHelper::to_string( const User & u )
 
     s << "user_id " << u.user_id
     << " group_id " << u.group_id
-    << " status " << to_string( u.status )
+    << " is_open " << int( u.is_open )
     << " login " << u.login
     << " password_hash " << "...";
 

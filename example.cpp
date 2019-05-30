@@ -8,12 +8,12 @@ user_manager::User * create_user_1( user_manager::UserManager * um, std::string 
 {
     user_manager::user_id_t id;
 
-    um->create_and_add_user( 1, user_manager::status_e::ACTIVE, "test", "\xf0\xf0\xf0", & id, error_msg );
+    um->create_and_add_user( 1, "test", "\xf0\xf0\xf0", & id, error_msg );
 
     auto res = um->find__unlocked( id );
 
+    res->add_field( user_manager::User::STATUS, int( user_manager::status_e::ACTIVE ) );
     res->add_field( user_manager::User::GENDER, int( user_manager::gender_e::MALE ) );
-
     res->add_field( user_manager::User::LAST_NAME,      "Doe" );
     res->add_field( user_manager::User::FIRST_NAME,     "John" );
     res->add_field( user_manager::User::COMPANY_NAME,   "Yoyodyne Inc." );
@@ -30,12 +30,13 @@ user_manager::User * create_user_2( user_manager::UserManager * um, std::string 
 {
     user_manager::user_id_t id;
 
-    um->create_and_add_user( 1, user_manager::status_e::ACTIVE, "test2", "\xae\xae\xae", & id, error_msg );
+    um->create_and_add_user( 1, "test2", "\xae\xae\xae", & id, error_msg );
 
     auto res = um->find__unlocked( id );
 
     static const int PHONE_2    = user_manager::User::USER_DEFINED_FIELD_ID_BASE + 1;
 
+    res->add_field( user_manager::User::STATUS,         int( user_manager::status_e::ACTIVE ) );
     res->add_field( user_manager::User::GENDER,         int( user_manager::gender_e::FEMALE ) );
     res->add_field( user_manager::User::LAST_NAME,      "Bowie" );
     res->add_field( user_manager::User::FIRST_NAME,     "Doris" );
@@ -48,38 +49,21 @@ user_manager::User * create_user_2( user_manager::UserManager * um, std::string 
     return res;
 }
 
-#ifdef XXX
 void test_2()
 {
     user_manager::UserManager m;
 
-    std::string error_msg;
-
-    auto u = create_user_1( & m, & error_msg );
-
-    auto b = m.add_loaded( u, & error_msg );
+    auto b = m.init( "users_broken_id.dat" );
 
     if( b )
     {
-        std::cout << "OK: user was added" << std::endl;
+        std::cout << "ERROR: file w/ broken IDs was unexpectedly loaded" << std::endl;
     }
     else
     {
-        std::cout << "ERROR: cannot add user" << std::endl;
-    }
-
-    b = m.add_loaded( u, & error_msg );
-
-    if( b == false )
-    {
-        std::cout << "OK: duplicate user was not added" << std::endl;
-    }
-    else
-    {
-        std::cout << "ERROR: duplicated user was added" << std::endl;
+        std::cout << "OK: file w/ broken IDs was not loaded (as expected)" << std::endl;
     }
 }
-#endif // XXX
 
 void test_3( user_manager::UserManager & m )
 {
@@ -116,8 +100,8 @@ void test_5()
 
     std::string error_msg;
 
-    auto u1 = create_user_1( & m, & error_msg );
-    auto u2 = create_user_2( & m, & error_msg );
+    create_user_1( & m, & error_msg );
+    create_user_2( & m, & error_msg );
 
     auto b = m.save( & error_msg, "test.dat" );
 
@@ -131,11 +115,17 @@ void test_5()
     }
 }
 
+void test_6( const user_manager::UserManager & m )
+{
+    std::string error_msg;
+    m.save( & error_msg, "users_new.dat" );
+}
+
 int main( int argc, const char* argv[] )
 {
     user_manager::UserManager m;
 
-    auto b = m.init( "users.dat" );
+    auto b = m.init( "users.v2.dat" );
 
     if( b )
     {
@@ -147,10 +137,11 @@ int main( int argc, const char* argv[] )
         return -1;
     }
 
-    //test_2();
+    test_2();
     test_3( m );
     test_4( m );
     test_5();
+    test_6( m );
 
     return 0;
 }
