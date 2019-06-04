@@ -53,7 +53,7 @@ void test_2()
 {
     user_manager::UserManager m;
 
-    auto b = m.init( "users_broken_id.dat" );
+    auto b = m.init( "users.duplicate_id.dat" );
 
     if( b )
     {
@@ -121,6 +121,38 @@ void test_6( const user_manager::UserManager & m )
     m.save( & error_msg, "users_new.dat" );
 }
 
+void test_7()
+{
+    user_manager::UserManager m;
+
+    auto b = m.init( "users_new.dat" );
+
+    if( b )
+    {
+        std::cout << "OK: user file was loaded" << std::endl;
+    }
+    else
+    {
+        std::cout << "ERROR: cannot load users" << std::endl;
+    }
+}
+
+void test_8()
+{
+    user_manager::UserManager m;
+
+    auto b = m.init( "users.duplicate_login.dat" );
+
+    if( b )
+    {
+        std::cout << "ERROR: file w/ duplicate logins was unexpectedly loaded" << std::endl;
+    }
+    else
+    {
+        std::cout << "OK: file w/ duplicate logins was not loaded (as expected)" << std::endl;
+    }
+}
+
 int main( int argc, const char* argv[] )
 {
     user_manager::UserManager m;
@@ -142,6 +174,8 @@ int main( int argc, const char* argv[] )
     test_4( m );
     test_5();
     test_6( m );
+    test_7();
+    test_8();
 
     return 0;
 }
