@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11640 $ $Date:: 2019-05-26 #$ $Author: serge $
+// $Revision: 11710 $ $Date:: 2019-06-05 #$ $Author: serge $
 
 #include "user.h"           // self
 
@@ -43,9 +43,33 @@ bool User::get_field( const field_e field_id, Value * res ) const
     return true;
 }
 
+const Value & User::get_field( const field_e field_id ) const
+{
+    static const Value empty( 0 );
+
+    auto it = map_id_to_value_.find( field_id );
+
+    if( it == map_id_to_value_.end() )
+        return empty;
+
+    return it->second;
+}
+
 bool User::add_field( const field_e field_id, const Value & value )
 {
     return map_id_to_value_.insert( std::make_pair( field_id, value ) ).second;
+}
+
+bool User::update_field( const field_e field_id, const Value & value )
+{
+    auto it = map_id_to_value_.find( field_id );
+
+    if( it == map_id_to_value_.end() )
+        return false;
+
+    it->second  = value;
+
+    return true;
 }
 
 bool User::delete_field( const field_e field_id )

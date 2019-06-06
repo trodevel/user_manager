@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11685 $ $Date:: 2019-05-30 #$ $Author: serge $
+// $Revision: 11710 $ $Date:: 2019-06-05 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -84,7 +84,9 @@ struct User
 
     bool has_field( const field_e field_id ) const;
     bool get_field( const field_e field_id, Value * res ) const;
+    const Value & get_field( const field_e field_id ) const;
     bool add_field( const field_e field_id, const Value & value );
+    bool update_field( const field_e field_id, const Value & value );
     bool delete_field( const field_e field_id );
 
 private:
