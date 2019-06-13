@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11671 $ $Date:: 2019-05-30 #$ $Author: serge $
+// $Revision: 11719 $ $Date:: 2019-06-06 #$ $Author: serge $
 
 #ifndef USER_MANAGER__STATUS_H
 #define USER_MANAGER__STATUS_H

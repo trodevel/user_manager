@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11710 $ $Date:: 2019-06-05 #$ $Author: serge $
+// $Revision: 11732 $ $Date:: 2019-06-13 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -27,6 +27,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <map>              // std::map
 #include "types.h"          // user_id_t
 #include "anyvalue/value.h" // Value
+#include "utils/epoch32_t.h"    // utils::epoch32_t
 
 namespace user_manager
 {
@@ -80,7 +81,7 @@ struct User
     bool        is_open;
     std::string login;
     std::string password_hash;
-    uint32_t    creation_time;
+    utils::epoch32_t    creation_time;
 
     bool has_field( const field_e field_id ) const;
     bool get_field( const field_e field_id, Value * res ) const;

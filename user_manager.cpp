@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11687 $ $Date:: 2019-05-30 #$ $Author: serge $
+// $Revision: 11735 $ $Date:: 2019-06-13 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -28,7 +28,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "utils/mutex_helper.h"         // MUTEX_SCOPE_LOCK
 #include "utils/dummy_logger.h"         // dummy_log
 #include "utils/utils_assert.h"               // ASSERT
-#include "utils/chrono_epoch.h"         // to_epoch()
+#include "utils/get_now_epoch.h"        // get_now_epoch()
 #include "utils/rename_and_backup.h"    // utils::rename_and_backup
 
 #include "init_user.h"                  // init_User
@@ -87,7 +87,7 @@ bool UserManager::create_and_add_user(
 
     auto user = new User;
 
-    init_User( user, id, group_id, login, password_hash, utils::to_epoch( std::chrono::system_clock::now() ) );
+    init_User( user, id, group_id, login, password_hash, utils::get_now_epoch() );
 
     auto b = map_id_to_user_.insert( std::make_pair( user->user_id, user ) ).second;
 

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11685 $ $Date:: 2019-05-30 #$ $Author: serge $
+// $Revision: 11732 $ $Date:: 2019-06-13 #$ $Author: serge $
 
 #ifndef USER_MANAGER__INIT_USER_H
 #define USER_MANAGER__INIT_USER_H
@@ -35,7 +35,7 @@ inline User * init_User(
         group_id_t          group_id,
         const std::string   & login,
         const std::string   & password_hash,
-        uint32_t            creation_time )
+        utils::epoch32_t    creation_time )
 {
     res->user_id    = user_id;
     res->group_id   = group_id;
