@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11737 $ $Date:: 2019-06-13 #$ $Author: serge $
+// $Revision: 11747 $ $Date:: 2019-06-14 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -71,7 +71,7 @@ struct User
         STREET,
         HOUSE_NUMBER,
         EAL,
-        CONFIRMATION_UUID,
+        CONFIRMATION_KEY,
         CONFIRMATION_EXPIRATION,
         USER_DEFINED_FIELD_ID_BASE  = 1000,
     };
