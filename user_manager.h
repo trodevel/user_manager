@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11719 $ $Date:: 2019-06-06 #$ $Author: serge $
+// $Revision: 11762 $ $Date:: 2019-06-19 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -29,6 +29,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "user.h"           // User
 #include "status.h"         // Status
+
+#include "anyvalue/operations.h"    // anyvalue::comparison_type_e
 
 #include "utils/request_id_gen.h"   // utils::RequestIdGen
 
@@ -60,6 +62,8 @@ public:
 
     User* find__unlocked( const std::string & login );
     const User* find__unlocked( const std::string & login ) const;
+
+    std::vector<User*> select_users__unlocked( const User::field_e field_id, anyvalue::comparison_type_e op, const Value & value ) const;
 
     bool save( std::string * error_msg, const std::string & filename ) const;
 

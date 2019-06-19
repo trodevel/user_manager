@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11754 $ $Date:: 2019-06-17 #$ $Author: serge $
+// $Revision: 11763 $ $Date:: 2019-06-19 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -30,6 +30,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "utils/utils_assert.h"               // ASSERT
 #include "utils/get_now_epoch.h"        // get_now_epoch()
 #include "utils/rename_and_backup.h"    // utils::rename_and_backup
+#include "anyvalue/value_operations.h"  // anyvalue::compare_values
 
 #include "serializer.h"                 // serializer::load
 
@@ -183,6 +184,31 @@ const User* UserManager::find__unlocked( const std::string & login ) const
     }
 
     return nullptr;
+}
+
+std::vector<User*> UserManager::select_users__unlocked( const User::field_e field_id, anyvalue::comparison_type_e op, const Value & value ) const
+{
+    std::vector<User*>  res;
+
+    for( auto & e : map_id_to_user_ )
+    {
+        auto user = e.second;
+
+        if( user->is_open() == false )
+            continue;
+
+        Value v;
+
+        if( user->get_field( field_id, & v ) )
+        {
+            if( anyvalue::compare_values( op, v, value ) )
+            {
+                res.push_back( e.second );
+            }
+        }
+    }
+
+    return res;
 }
 
 std::mutex & UserManager::get_mutex() const
