@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11719 $ $Date:: 2019-06-06 #$ $Author: serge $
+// $Revision: 11754 $ $Date:: 2019-06-17 #$ $Author: serge $
 
 #include "str_helper.h"             // self
 
@@ -111,7 +111,7 @@ std::string StrHelper::to_string( const User & u )
 
     s << "user_id " << u.user_id
     << " group_id " << u.group_id
-    << " is_open " << int( u.is_open )
+    << " is_open " << int( u.is_open_ )
     << " login " << u.login
     << " password_hash " << "...";
 

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11719 $ $Date:: 2019-06-06 #$ $Author: serge $
+// $Revision: 11754 $ $Date:: 2019-06-17 #$ $Author: serge $
 
 #ifndef USER_MANAGER_SERIALIZER_H
 #define USER_MANAGER_SERIALIZER_H
@@ -49,6 +49,8 @@ class Serializer: public serializer::VersionableLoaderT<Serializer>
     friend serializer::VersionableLoaderT<Serializer>;
 
 public:
+    static User* create_User();
+
     static User* load( std::istream & is, User* e );
     static bool save( std::ostream & os, const User & e );
 

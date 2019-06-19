@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11747 $ $Date:: 2019-06-14 #$ $Author: serge $
+// $Revision: 11755 $ $Date:: 2019-06-17 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -76,14 +76,24 @@ struct User
         USER_DEFINED_FIELD_ID_BASE  = 1000,
     };
 
-    typedef std::map<field_e,Value> MapIdToValue;
+    User(
+            user_id_t           user_id,
+            group_id_t          group_id,
+            bool                is_open,
+            const std::string   & login,
+            const std::string   & password_hash,
+            uint32_t            creation_time );
 
-    user_id_t   user_id;
-    group_id_t  group_id;
-    bool        is_open;
-    std::string login;
-    std::string password_hash;
-    utils::epoch32_t    creation_time;
+    ~User();
+
+    user_id_t get_user_id() const;
+    group_id_t get_group_id() const;
+    bool is_open() const;
+    const std::string & get_login() const;
+    const std::string & get_password_hash() const;
+    utils::epoch32_t    get_creation_time() const;
+
+    void set_password_hash( const std::string & password_hash );
 
     bool has_field( const field_e field_id ) const;
     bool get_field( const field_e field_id, Value * res ) const;
@@ -93,6 +103,21 @@ struct User
     bool delete_field( const field_e field_id );
 
 private:
+
+    User(); // for serializer
+
+private:
+
+    typedef std::map<field_e,Value> MapIdToValue;
+
+private:
+
+    user_id_t           user_id;
+    group_id_t          group_id;
+    bool                is_open_;
+    std::string         login;
+    std::string         password_hash;
+    utils::epoch32_t    creation_time;
 
     MapIdToValue map_id_to_value_;
 };

@@ -19,12 +19,72 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11719 $ $Date:: 2019-06-06 #$ $Author: serge $
+// $Revision: 11755 $ $Date:: 2019-06-17 #$ $Author: serge $
 
 #include "user.h"           // self
 
 namespace user_manager
 {
+
+User::User():
+                user_id( 0 ),
+                group_id( 0 ),
+                is_open_( false ),
+                creation_time( 0 )
+{
+}
+
+User::User(
+        user_id_t           user_id,
+        group_id_t          group_id,
+        bool                is_open,
+        const std::string   & login,
+        const std::string   & password_hash,
+        uint32_t            creation_time ):
+                user_id( user_id ),
+                group_id( group_id ),
+                is_open_( is_open ),
+                login( login ),
+                password_hash( password_hash ),
+                creation_time( creation_time )
+{
+}
+
+User::~User()
+{
+}
+
+user_id_t User::get_user_id() const
+{
+    return user_id;
+}
+
+group_id_t User::get_group_id() const
+{
+    return group_id;
+}
+
+bool User::is_open() const
+{
+    return is_open_;
+}
+const std::string & User::get_login() const
+{
+    return login;
+}
+const std::string & User::get_password_hash() const
+{
+    return password_hash;
+}
+utils::epoch32_t    User::get_creation_time() const
+{
+    return creation_time;
+}
+
+void User::set_password_hash( const std::string & p )
+{
+    password_hash   = p;
+}
 
 bool User::has_field( const field_e field_id ) const
 {

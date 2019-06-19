@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11735 $ $Date:: 2019-06-13 #$ $Author: serge $
+// $Revision: 11754 $ $Date:: 2019-06-17 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -31,7 +31,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "utils/get_now_epoch.h"        // get_now_epoch()
 #include "utils/rename_and_backup.h"    // utils::rename_and_backup
 
-#include "init_user.h"                  // init_User
 #include "serializer.h"                 // serializer::load
 
 #define MODULENAME      "UserManager"
@@ -85,15 +84,13 @@ bool UserManager::create_and_add_user(
 
     auto id = req_id_gen_.get_next_request_id();
 
-    auto user = new User;
+    auto user = new User( id, group_id, true, login, password_hash, utils::get_now_epoch() );
 
-    init_User( user, id, group_id, login, password_hash, utils::get_now_epoch() );
-
-    auto b = map_id_to_user_.insert( std::make_pair( user->user_id, user ) ).second;
+    auto b = map_id_to_user_.insert( std::make_pair( id, user ) ).second;
 
     assert( b );    // should never happen
 
-    map_login_to_user_id_.insert( std::make_pair( user->login, user->user_id ) );
+    map_login_to_user_id_.insert( std::make_pair( login, id ) );
 
     * user_id = id;
 
@@ -115,10 +112,10 @@ bool UserManager::delete_user( user_id_t user_id, std::string * error_msg )
 
     auto user = it->second;
 
-    auto it2 = map_login_to_user_id_.find( user->login );
+    auto it2 = map_login_to_user_id_.find( user->get_login() );
     if( it2 == map_login_to_user_id_.end() )
     {
-        * error_msg   = "corrupted: user login " + user->login + " for user id " + std::to_string( user->user_id ) + " not found";
+        * error_msg   = "corrupted: user login " + user->get_login() + " for user id " + std::to_string( user->get_user_id() ) + " not found";
         return false;
     }
 
@@ -300,11 +297,11 @@ bool UserManager::init_from_status( std::string * error_msg, const Status & stat
 
     for( auto & e : status.users )
     {
-        auto b = map_id_to_user_.insert( std::make_pair( e->user_id, e ) ).second;
+        auto b = map_id_to_user_.insert( std::make_pair( e->get_user_id(), e ) ).second;
 
         if( b == false )
         {
-            * error_msg = "duplicate user id " + std::to_string( e->user_id );
+            * error_msg = "duplicate user id " + std::to_string( e->get_user_id() );
 
             return false;
         }
@@ -312,11 +309,11 @@ bool UserManager::init_from_status( std::string * error_msg, const Status & stat
 
     for( auto e : map_id_to_user_ )
     {
-        auto b = map_login_to_user_id_.insert( std::make_pair( e.second->login, e.first ) ).second;
+        auto b = map_login_to_user_id_.insert( std::make_pair( e.second->get_login(), e.first ) ).second;
 
         if( b == false )
         {
-            * error_msg = "duplicate login " + e.second->login + ", user id " + std::to_string( e.first );
+            * error_msg = "duplicate login " + e.second->get_login() + ", user id " + std::to_string( e.first );
 
             return false;
         }

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11719 $ $Date:: 2019-06-06 #$ $Author: serge $
+// $Revision: 11754 $ $Date:: 2019-06-17 #$ $Author: serge $
 
 #include "serializer.h"     // self
 
@@ -49,7 +49,7 @@ user_manager::User* load( std::istream & is, user_manager::User* e )
     if( e != nullptr )
         throw std::invalid_argument( "Serializer::load: e must be null" );
 
-    auto el = new user_manager::User;
+    auto el = user_manager::Serializer::create_User();
 
     auto res = user_manager::Serializer::load( is, static_cast< user_manager::User *>( el ) );
 
@@ -85,6 +85,11 @@ bool save( std::ostream & os, const user_manager::User * e )
 
 namespace user_manager
 {
+
+User* Serializer::create_User()
+{
+    return new User();
+}
 
 User* Serializer::load_1( std::istream & is, User* res )
 {
@@ -143,7 +148,7 @@ User* Serializer::load_2( std::istream & is, User* res )
     static const int EMAIL_2    = user_manager::User::USER_DEFINED_FIELD_ID_BASE + 1;
     static const int PHONE_2    = user_manager::User::USER_DEFINED_FIELD_ID_BASE + 2;
 
-    res->is_open    = ( static_cast<status_e>( status ) == status_e::WAITING_CONFIRMATION ) ? false : true;
+    res->is_open_   = ( static_cast<status_e>( status ) == status_e::WAITING_CONFIRMATION ) ? false : true;
 
     res->add_field( user_manager::User::STATUS,             status );
     res->add_field( user_manager::User::GENDER,             gender );
@@ -168,7 +173,7 @@ User* Serializer::load_3( std::istream & is, User* res )
         return nullptr;
     if( serializer::load( is, & res->group_id ) == nullptr )
         return nullptr;
-    if( serializer::load( is, & res->is_open ) == nullptr )
+    if( serializer::load( is, & res->is_open_ ) == nullptr )
         return nullptr;
     if( serializer::load( is, & res->login ) == nullptr )
         return nullptr;
@@ -201,7 +206,7 @@ bool Serializer::save( std::ostream & os, const User & e )
 
     b &= serializer::save( os, e.user_id );
     b &= serializer::save( os, e.group_id );
-    b &= serializer::save( os, e.is_open );
+    b &= serializer::save( os, e.is_open_ );
     b &= serializer::save( os, e.login );
     b &= serializer::save( os, utils::hex_string( e.password_hash ) );
     b &= serializer::save( os, e.creation_time );
