@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11755 $ $Date:: 2019-06-17 #$ $Author: serge $
+// $Revision: 11870 $ $Date:: 2019-08-13 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -56,6 +56,12 @@ struct User
     enum field_e
     {
         UNDEF   = 0,
+        ID,
+        GROUP_ID,
+        LOGIN,
+        IS_OPEN,
+        CREATION_TIME,
+        MODIFICATION_TIME,
         STATUS,
         GENDER,
         TITLE,

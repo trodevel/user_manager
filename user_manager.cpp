@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11763 $ $Date:: 2019-06-19 #$ $Author: serge $
+// $Revision: 11873 $ $Date:: 2019-08-13 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -45,20 +45,36 @@ UserManager::UserManager()
 
 UserManager::~UserManager()
 {
-    for( auto e: map_id_to_user_ )
-    {
-        delete e.second;
-    }
 }
 
-bool UserManager::init(
-        const std::string   & filename )
+bool UserManager::init()
 {
     MUTEX_SCOPE_LOCK( mutex_ );
 
     req_id_gen_.init( 1, 1 );
 
-    auto b = load_intern( filename );
+    auto b = users_.init( std::vector<anyvalue_db::field_id_t>( { User::ID, User::LOGIN, User::CONFIRMATION_KEY } ));
+
+    return b;
+}
+
+bool UserManager::load(
+        const std::string   & filename,
+        std::string         * error_msg )
+{
+    MUTEX_SCOPE_LOCK( mutex_ );
+
+    anyvalue_db::Table  users;
+
+    auto b = users.init( filename );
+
+    if( b == false )
+    {
+        * error_msg = "cannot load " + filename;
+        return false;
+    }
+
+    users_  = users;
 
     return b;
 }
@@ -72,7 +88,7 @@ bool UserManager::create_and_add_user(
 {
     MUTEX_SCOPE_LOCK( mutex_ );
 
-    auto c = map_login_to_user_id_.count( login );
+    auto c = users_.find__unlocked( login );
 
     if( c > 0 )
     {

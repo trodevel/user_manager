@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11762 $ $Date:: 2019-06-19 #$ $Author: serge $
+// $Revision: 11871 $ $Date:: 2019-08-13 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -31,6 +31,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "status.h"         // Status
 
 #include "anyvalue/operations.h"    // anyvalue::comparison_type_e
+#include "anyvalue_db/table.h"      // anyvalue_db::Table
 
 #include "utils/request_id_gen.h"   // utils::RequestIdGen
 
@@ -46,8 +47,11 @@ public:
     UserManager();
     ~UserManager();
 
-    bool init(
-            const std::string & filename );
+    bool init();
+
+    bool load(
+            const std::string   & filename,
+            std::string         * error_msg );
 
     bool create_and_add_user(
             group_id_t          group_id,
@@ -93,8 +97,7 @@ private:
     // Config
     std::string                 credentials_file_;
 
-    MapUserIdToUser             map_id_to_user_;
-    MapLoginToUserId            map_login_to_user_id_;
+    anyvalue_db::Table          users_;
 
     utils::RequestIdGen         req_id_gen_;
 };
