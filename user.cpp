@@ -19,17 +19,19 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11878 $ $Date:: 2019-08-15 #$ $Author: serge $
+// $Revision: 11884 $ $Date:: 2019-08-16 #$ $Author: serge $
 
 #include "user.h"           // self
+
+#include <cassert>
 
 namespace user_manager
 {
 
 User::User():
+        record_( nullptr ),
         is_inserted_( false )
 {
-    record_ = new anyvalue_db::Record;
 }
 
 User::User(
@@ -81,8 +83,16 @@ User::~User()
 {
     if( is_inserted_ == false )
     {
-        delete record_;
+        if( record_ != nullptr )
+            delete record_;
     }
+}
+
+bool User::is_empty() const
+{
+    assert( is_inserted_ == false );
+
+    return record_ == nullptr;
 }
 
 user_id_t User::get_user_id() const
@@ -193,6 +203,27 @@ bool User::update_field( const field_e field_id, const Value & value )
 bool User::delete_field( const field_e field_id )
 {
     return record_->delete_field( field_id );
+}
+
+bool User::insert_into( anyvalue_db::Table * table, std::string * error_msg )
+{
+    if( is_inserted_ == true )
+    {
+        assert( 0 );    // should not happen
+
+        * error_msg = "record is already inserted";
+
+        return false;
+    }
+
+    auto b = table->add_record( record_, error_msg );
+
+    if( b )
+    {
+        is_inserted_    = true;
+    }
+
+    return b;
 }
 
 } // namespace user_manager

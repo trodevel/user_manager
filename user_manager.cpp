@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11875 $ $Date:: 2019-08-15 #$ $Author: serge $
+// $Revision: 11882 $ $Date:: 2019-08-16 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -49,8 +49,6 @@ UserManager::~UserManager()
 
 bool UserManager::init()
 {
-    MUTEX_SCOPE_LOCK( mutex_ );
-
     req_id_gen_.init( 1, 1 );
 
     auto b = users_.init( std::vector<anyvalue_db::field_id_t>( { User::USER_ID, User::LOGIN, User::REGISTRATION_KEY } ));
@@ -62,8 +60,6 @@ bool UserManager::load(
         const std::string   & filename,
         std::string         * error_msg )
 {
-    MUTEX_SCOPE_LOCK( mutex_ );
-
     anyvalue_db::Table  users;
 
     auto b = users.init( filename );
@@ -83,14 +79,17 @@ bool UserManager::create_and_add_user(
         group_id_t          group_id,
         const std::string   & login,
         const std::string   & password_hash,
+        const std::string   & registration_key,
         user_id_t           * user_id,
         std::string         * error_msg )
 {
-    MUTEX_SCOPE_LOCK( mutex_ );
+    auto & mutex = users_.get_mutex();
 
-    auto c = users_.find__unlocked( login );
+    MUTEX_SCOPE_LOCK( mutex );
 
-    if( c > 0 )
+    auto rec = users_.find__unlocked( User::LOGIN, login );
+
+    if( rec != nullptr )
     {
         * error_msg = "login " + login + " is already used";
 
@@ -101,13 +100,16 @@ bool UserManager::create_and_add_user(
 
     auto id = req_id_gen_.get_next_request_id();
 
-    auto user = new User( id, group_id, true, login, password_hash, utils::get_now_epoch() );
+    User user( id, group_id, true, login, password_hash, registration_key, utils::get_now_epoch() );
 
-    auto b = map_id_to_user_.insert( std::make_pair( id, user ) ).second;
+    auto b = user.insert_into( & users_, error_msg );
 
-    assert( b );    // should never happen
+    if( b == false )
+    {
+        dummy_log_error( MODULENAME, "create_and_add_user: cannot add user, login %s, %s", login.c_str(), error_msg->c_str() );
 
-    map_login_to_user_id_.insert( std::make_pair( login, id ) );
+        return false;
+    }
 
     * user_id = id;
 
@@ -118,30 +120,11 @@ bool UserManager::create_and_add_user(
 
 bool UserManager::delete_user( user_id_t user_id, std::string * error_msg )
 {
-    MUTEX_SCOPE_LOCK( mutex_ );
+    auto & mutex = users_.get_mutex();
 
-    auto it = map_id_to_user_.find( user_id );
-    if( it == map_id_to_user_.end() )
-    {
-        * error_msg   = "user id " + std::to_string( user_id ) + " not found";
-        return false;
-    }
+    MUTEX_SCOPE_LOCK( mutex );
 
-    auto user = it->second;
-
-    auto it2 = map_login_to_user_id_.find( user->get_login() );
-    if( it2 == map_login_to_user_id_.end() )
-    {
-        * error_msg   = "corrupted: user login " + user->get_login() + " for user id " + std::to_string( user->get_user_id() ) + " not found";
-        return false;
-    }
-
-    map_id_to_user_.erase( it );
-    map_login_to_user_id_.erase( it2 );
-
-    delete user;
-
-    return true;
+    return users_.delete_record__unlocked( User::USER_ID, anyvalue::Value( user_id ), error_msg );
 }
 
 User* UserManager::find__unlocked( user_id_t user_id )
@@ -229,7 +212,7 @@ std::vector<User*> UserManager::select_users__unlocked( const User::field_e fiel
 
 std::mutex & UserManager::get_mutex() const
 {
-    return mutex_;
+    return users_.get_mutex();
 }
 
 bool UserManager::is_inited__() const

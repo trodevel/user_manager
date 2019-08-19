@@ -19,14 +19,14 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11876 $ $Date:: 2019-08-15 #$ $Author: serge $
+// $Revision: 11884 $ $Date:: 2019-08-16 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
 
 #include <map>              // std::map
 #include "types.h"          // user_id_t
-#include "anyvalue_db/record.h" // Record
+#include "anyvalue_db/table.h"  // Table
 #include "utils/epoch32_t.h"    // utils::epoch32_t
 
 namespace user_manager
@@ -83,6 +83,8 @@ struct User
         USER_DEFINED_FIELD_ID_BASE  = 1000,
     };
 
+    User();
+
     User(
             user_id_t           user_id,
             group_id_t          group_id,
@@ -96,6 +98,8 @@ struct User
             anyvalue_db::Record * record );
 
     ~User();
+
+    bool is_empty() const;
 
     user_id_t get_user_id() const;
     group_id_t get_group_id() const;
@@ -113,9 +117,7 @@ struct User
     bool update_field( const field_e field_id, const Value & value );
     bool delete_field( const field_e field_id );
 
-private:
-
-    User(); // for serializer
+    bool insert_into( anyvalue_db::Table * table, std::string * error_msg );
 
 private:
 

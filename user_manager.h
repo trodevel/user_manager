@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11871 $ $Date:: 2019-08-13 #$ $Author: serge $
+// $Revision: 11879 $ $Date:: 2019-08-16 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -57,6 +57,7 @@ public:
             group_id_t          group_id,
             const std::string   & login,
             const std::string   & password_hash,
+            const std::string   & registration_key,
             user_id_t           * user_id,
             std::string         * error_msg );
     bool delete_user( user_id_t user_id, std::string * error_msg );
@@ -92,8 +93,6 @@ private:
     bool is_inited__() const;
 
 private:
-    mutable std::mutex          mutex_;
-
     // Config
     std::string                 credentials_file_;
 
