@@ -19,20 +19,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11882 $ $Date:: 2019-08-16 #$ $Author: serge $
+// $Revision: 11892 $ $Date:: 2019-08-19 #$ $Author: serge $
 
 #include "user_manager.h"               // self
-
-#include <fstream>                      // std::ifstream
 
 #include "utils/mutex_helper.h"         // MUTEX_SCOPE_LOCK
 #include "utils/dummy_logger.h"         // dummy_log
 #include "utils/utils_assert.h"               // ASSERT
 #include "utils/get_now_epoch.h"        // get_now_epoch()
-#include "utils/rename_and_backup.h"    // utils::rename_and_backup
 #include "anyvalue/value_operations.h"  // anyvalue::compare_values
-
-#include "serializer.h"                 // serializer::load
 
 #define MODULENAME      "UserManager"
 
@@ -127,84 +122,75 @@ bool UserManager::delete_user( user_id_t user_id, std::string * error_msg )
     return users_.delete_record__unlocked( User::USER_ID, anyvalue::Value( user_id ), error_msg );
 }
 
-User* UserManager::find__unlocked( user_id_t user_id )
+User UserManager::find__unlocked( user_id_t user_id )
 {
-    return find__( user_id );
+    auto rec = users_.find__unlocked( User::USER_ID, anyvalue::Value( user_id ) );
+
+    if( rec != nullptr )
+        return User( rec );
+
+    return User();
 }
 
-const User* UserManager::find__unlocked( user_id_t user_id ) const
+User UserManager::find__unlocked( user_id_t user_id ) const
 {
-    return find__( user_id );
+    auto rec = users_.find__unlocked( User::USER_ID, anyvalue::Value( user_id ) );
+
+    if( rec != nullptr )
+        return User( rec );
+
+    return User();
 }
 
-User* UserManager::find__( user_id_t user_id )
+User UserManager::find__unlocked( const std::string & login )
 {
-    auto it = map_id_to_user_.find( user_id );
+    auto rec = users_.find__unlocked( User::LOGIN, anyvalue::Value( login ) );
 
-    if( it != map_id_to_user_.end() )
+    if( rec != nullptr )
+        return User( rec );
+
+    return User();
+}
+
+User UserManager::find__unlocked( const std::string & login ) const
+{
+    auto rec = users_.find__unlocked( User::LOGIN, anyvalue::Value( login ) );
+
+    if( rec != nullptr )
+        return User( rec );
+
+    return User();
+}
+
+User UserManager::find_regkey__unlocked( const std::string & regkey )
+{
+    auto rec = users_.find__unlocked( User::REGISTRATION_KEY, anyvalue::Value( regkey ) );
+
+    if( rec != nullptr )
+        return User( rec );
+
+    return User();
+}
+
+User UserManager::find_regkey__unlocked( const std::string & regkey ) const
+{
+    auto rec = users_.find__unlocked( User::REGISTRATION_KEY, anyvalue::Value( regkey ) );
+
+    if( rec != nullptr )
+        return User( rec );
+
+    return User();
+}
+
+std::vector<User> UserManager::select_users__unlocked( const User::field_e field_id, anyvalue::comparison_type_e op, const Value & value ) const
+{
+    std::vector<User>  res;
+
+    auto recs = users_.select__unlocked( field_id, op, value );
+
+    for( auto r : recs )
     {
-        return it->second;
-    }
-
-    return nullptr;
-}
-
-const User* UserManager::find__( user_id_t user_id ) const
-{
-    auto it = map_id_to_user_.find( user_id );
-
-    if( it != map_id_to_user_.end() )
-    {
-        return it->second;
-    }
-
-    return nullptr;
-}
-
-User* UserManager::find__unlocked( const std::string & login )
-{
-    auto it = map_login_to_user_id_.find( login );
-
-    if( it != map_login_to_user_id_.end() )
-    {
-        return find__( it->second );
-    }
-
-    return nullptr;
-}
-
-const User* UserManager::find__unlocked( const std::string & login ) const
-{
-    auto it = map_login_to_user_id_.find( login );
-
-    if( it != map_login_to_user_id_.end() )
-    {
-        return find__( it->second );
-    }
-
-    return nullptr;
-}
-
-std::vector<User*> UserManager::select_users__unlocked( const User::field_e field_id, anyvalue::comparison_type_e op, const Value & value ) const
-{
-    std::vector<User*>  res;
-
-    for( auto & e : map_id_to_user_ )
-    {
-        auto user = e.second;
-
-        if( user->is_open() == false )
-            continue;
-
-        Value v;
-
-        if( user->get_field( field_id, & v ) )
-        {
-            if( anyvalue::compare_values( op, v, value ) )
-            {
-                res.push_back( e.second );
-            }
-        }
+        res.push_back( User( r ) );
     }
 
     return res;
@@ -220,131 +206,10 @@ bool UserManager::is_inited__() const
     return true;
 }
 
-bool UserManager::load_intern( const std::string & filename )
-{
-    std::ifstream is( filename );
-
-    if( is.fail() )
-    {
-        dummy_log_warn( MODULENAME, "load_intern: cannot open credentials file %s", filename.c_str() );
-        return false;
-    }
-
-    Status status;
-
-    auto res = Serializer::load( is, & status );
-
-    if( res == nullptr )
-    {
-        dummy_log_error( MODULENAME, "load_intern: cannot load credentials" );
-        return false;
-    }
-
-    std::string error_msg;
-
-    auto b = init_from_status( & error_msg, status );
-
-    if( b == false )
-    {
-        dummy_log_error( MODULENAME, "load_intern: cannot init login map: %s", error_msg.c_str() );
-        return false;
-    }
-
-    dummy_log_info( MODULENAME, "load_intern: loaded %d entries from %s, last id %u", map_id_to_user_.size(), filename.c_str(), status.last_id );
-
-    return true;
-}
-
 bool UserManager::save( std::string * error_msg, const std::string & filename ) const
 {
-    MUTEX_SCOPE_LOCK( mutex_ );
-
-    auto temp_name  = filename + ".tmp";
-
-    auto b = save_intern( error_msg, temp_name );
-
-    if( b == false )
-        return false;
-
-    utils::rename_and_backup( temp_name, filename );
-
-    return true;
+    return users_.save( error_msg, filename );
 }
 
-bool UserManager::save_intern( std::string * error_msg, const std::string & filename ) const
-{
-    std::ofstream os( filename );
-
-    if( os.fail() )
-    {
-        dummy_log_error( MODULENAME, "save_intern: cannot open credentials file %s", filename.c_str() );
-
-        * error_msg =  "cannot open file " + filename;
-
-        return false;
-    }
-
-    Status status;
-
-    get_status( & status );
-
-    auto res = Serializer::save( os, status );
-
-    if( res == false )
-    {
-        dummy_log_error( MODULENAME, "save_intern: cannot save credentials into file %s", filename.c_str()  );
-
-        * error_msg =  "cannot save data into file " + filename;
-
-        return false;
-    }
-
-    dummy_log_info( MODULENAME, "save: save %d entries into %s", map_id_to_user_.size(), filename.c_str() );
-
-    return true;
-}
-
-void UserManager::get_status( Status * res ) const
-{
-    res->last_id   = req_id_gen_.get_last_request_id();
-
-    for( auto & e : map_id_to_user_ )
-    {
-        res->users.push_back( e.second );
-    }
-}
-
-bool UserManager::init_from_status( std::string * error_msg, const Status & status )
-{
-    req_id_gen_.init( status.last_id, 1 );
-
-    map_id_to_user_.clear();
-
-    for( auto & e : status.users )
-    {
-        auto b = map_id_to_user_.insert( std::make_pair( e->get_user_id(), e ) ).second;
-
-        if( b == false )
-        {
-            * error_msg = "duplicate user id " + std::to_string( e->get_user_id() );
-
-            return false;
-        }
-    }
-
-    for( auto e : map_id_to_user_ )
-    {
-        auto b = map_login_to_user_id_.insert( std::make_pair( e.second->get_login(), e.first ) ).second;
-
-        if( b == false )
-        {
-            * error_msg = "duplicate login " + e.second->get_login() + ", user id " + std::to_string( e.first );
-
-            return false;
-        }
-    }
-
-    return true;
-}
 
 } // namespace user_manager

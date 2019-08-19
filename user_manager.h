@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11879 $ $Date:: 2019-08-16 #$ $Author: serge $
+// $Revision: 11891 $ $Date:: 2019-08-19 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -62,33 +62,22 @@ public:
             std::string         * error_msg );
     bool delete_user( user_id_t user_id, std::string * error_msg );
 
-    User* find__unlocked( user_id_t user_id );
-    const User* find__unlocked( user_id_t user_id ) const;
+    User find__unlocked( user_id_t user_id );
+    User find__unlocked( user_id_t user_id ) const;
 
-    User* find__unlocked( const std::string & login );
-    const User* find__unlocked( const std::string & login ) const;
+    User find__unlocked( const std::string & login );
+    User find__unlocked( const std::string & login ) const;
 
-    std::vector<User*> select_users__unlocked( const User::field_e field_id, anyvalue::comparison_type_e op, const Value & value ) const;
+    User find_regkey__unlocked( const std::string & regkey );
+    User find_regkey__unlocked( const std::string & regkey ) const;
+
+    std::vector<User> select_users__unlocked( const User::field_e field_id, anyvalue::comparison_type_e op, const Value & value ) const;
 
     bool save( std::string * error_msg, const std::string & filename ) const;
 
     std::mutex & get_mutex() const;
 
 private:
-
-    typedef std::map<user_id_t,User*>       MapUserIdToUser;
-    typedef std::map<std::string,user_id_t> MapLoginToUserId;
-
-private:
-
-    User* find__( user_id_t user_id );
-    const User* find__( user_id_t user_id ) const;
-
-    bool save_intern( std::string * error_msg, const std::string & filename ) const;
-    bool load_intern( const std::string & filename );
-
-    void get_status( Status * res ) const;
-    bool init_from_status( std::string * error_msg, const Status & status );
 
     bool is_inited__() const;
 
