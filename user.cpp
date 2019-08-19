@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11755 $ $Date:: 2019-06-17 #$ $Author: serge $
+// $Revision: 11878 $ $Date:: 2019-08-15 #$ $Author: serge $
 
 #include "user.h"           // self
 
@@ -27,11 +27,9 @@ namespace user_manager
 {
 
 User::User():
-                user_id( 0 ),
-                group_id( 0 ),
-                is_open_( false ),
-                creation_time( 0 )
+        is_inserted_( false )
 {
+    record_ = new anyvalue_db::Record;
 }
 
 User::User(
@@ -40,101 +38,161 @@ User::User(
         bool                is_open,
         const std::string   & login,
         const std::string   & password_hash,
+        const std::string   & registration_key,
         uint32_t            creation_time ):
-                user_id( user_id ),
-                group_id( group_id ),
-                is_open_( is_open ),
-                login( login ),
-                password_hash( password_hash ),
-                creation_time( creation_time )
+        is_inserted_( false )
+{
+    record_ = new anyvalue_db::Record;
+
+    record_->add_field( USER_ID,            anyvalue::Value( int( user_id ) ) );
+    record_->add_field( GROUP_ID,           anyvalue::Value( int( group_id ) ) );
+    record_->add_field( IS_OPEN,            anyvalue::Value( is_open ) );
+    record_->add_field( LOGIN,              anyvalue::Value( login ) );
+    record_->add_field( PASSWORD_HASH,      anyvalue::Value( password_hash ) );
+    record_->add_field( REGISTRATION_KEY,   anyvalue::Value( registration_key ) );
+    record_->add_field( CREATION_TIME,      anyvalue::Value( creation_time ) );
+
+    cache_.user_id          = user_id;
+    cache_.group_id         = group_id;
+    cache_.is_open          = is_open;
+    cache_.login            = login;
+    cache_.password_hash    = password_hash;
+    cache_.registration_key = registration_key;
+    cache_.creation_time    = creation_time;
+
+    cache_.has_user_id          = true;
+    cache_.has_group_id         = true;
+    cache_.has_is_open          = true;
+    cache_.has_login            = true;
+    cache_.has_password_hash    = true;
+    cache_.has_registration_key = true;
+    cache_.has_creation_time    = true;
+}
+
+
+User::User(
+        anyvalue_db::Record * record ):
+                record_( record ),
+                is_inserted_( true )
 {
 }
 
 User::~User()
 {
+    if( is_inserted_ == false )
+    {
+        delete record_;
+    }
 }
 
 user_id_t User::get_user_id() const
 {
-    return user_id;
+    if( cache_.has_user_id )
+        return cache_.user_id;
+
+    cache_.user_id      = get_field( USER_ID ).arg_i;
+    cache_.has_user_id  = true;
+
+    return cache_.user_id;
 }
 
 group_id_t User::get_group_id() const
 {
-    return group_id;
+    if( cache_.has_group_id )
+        return cache_.group_id;
+
+    cache_.group_id      = get_field( GROUP_ID ).arg_i;
+    cache_.has_group_id  = true;
+
+    return cache_.group_id;
 }
 
 bool User::is_open() const
 {
-    return is_open_;
+    if( cache_.has_is_open )
+        return cache_.is_open;
+
+    cache_.is_open      = get_field( IS_OPEN ).arg_b;
+    cache_.has_is_open  = true;
+
+    return cache_.is_open;
 }
 const std::string & User::get_login() const
 {
-    return login;
+    if( cache_.has_login )
+        return cache_.login;
+
+    cache_.login      = get_field( LOGIN ).arg_s;
+    cache_.has_login  = true;
+
+    return cache_.login;
 }
 const std::string & User::get_password_hash() const
 {
-    return password_hash;
+    if( cache_.has_password_hash )
+        return cache_.password_hash;
+
+    cache_.password_hash      = get_field( PASSWORD_HASH ).arg_s;
+    cache_.has_password_hash  = true;
+
+    return cache_.password_hash;
 }
 utils::epoch32_t    User::get_creation_time() const
 {
-    return creation_time;
+    if( cache_.has_creation_time )
+        return cache_.creation_time;
+
+    cache_.creation_time      = get_field( CREATION_TIME ).arg_i;
+    cache_.has_creation_time  = true;
+
+    return cache_.creation_time;
 }
 
 void User::set_password_hash( const std::string & p )
 {
-    password_hash   = p;
+    cache_.has_password_hash    = true;
+    cache_.password_hash        = p;
+
+    update_field( PASSWORD_HASH, p );
 }
 
 bool User::has_field( const field_e field_id ) const
 {
-    return map_id_to_value_.count( field_id ) > 0;
+    return record_->has_field( field_id );
 }
 
 bool User::get_field( const field_e field_id, Value * res ) const
 {
-    auto it = map_id_to_value_.find( field_id );
-
-    if( it == map_id_to_value_.end() )
-        return false;
-
-    * res = it->second;
-
-    return true;
+    return record_->get_field( field_id, res );
 }
 
 const Value & User::get_field( const field_e field_id ) const
 {
     static const Value empty( 0 );
 
-    auto it = map_id_to_value_.find( field_id );
+    Value res;
 
-    if( it == map_id_to_value_.end() )
+    auto b = record_->get_field( field_id, & res );
+
+    if( b == false )
         return empty;
 
-    return it->second;
+    return res;
 }
 
 bool User::add_field( const field_e field_id, const Value & value )
 {
-    return map_id_to_value_.insert( std::make_pair( field_id, value ) ).second;
+    return record_->add_field( field_id, value );
 }
 
 bool User::update_field( const field_e field_id, const Value & value )
 {
-    auto it = map_id_to_value_.find( field_id );
-
-    if( it == map_id_to_value_.end() )
-        return false;
-
-    it->second  = value;
-
-    return true;
+    return record_->update_field( field_id, value );
 }
 
 bool User::delete_field( const field_e field_id )
 {
-    return map_id_to_value_.erase( field_id ) > 0;
+    return record_->delete_field( field_id );
 }
 
 } // namespace user_manager

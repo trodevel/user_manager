@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11873 $ $Date:: 2019-08-13 #$ $Author: serge $
+// $Revision: 11875 $ $Date:: 2019-08-15 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -53,7 +53,7 @@ bool UserManager::init()
 
     req_id_gen_.init( 1, 1 );
 
-    auto b = users_.init( std::vector<anyvalue_db::field_id_t>( { User::ID, User::LOGIN, User::CONFIRMATION_KEY } ));
+    auto b = users_.init( std::vector<anyvalue_db::field_id_t>( { User::USER_ID, User::LOGIN, User::REGISTRATION_KEY } ));
 
     return b;
 }
