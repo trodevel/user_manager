@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11892 $ $Date:: 2019-08-19 #$ $Author: serge $
+// $Revision: 11903 $ $Date:: 2019-08-20 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -46,7 +46,9 @@ bool UserManager::init()
 {
     req_id_gen_.init( 1, 1 );
 
-    auto b = users_.init( std::vector<anyvalue_db::field_id_t>( { User::USER_ID, User::LOGIN, User::REGISTRATION_KEY } ));
+    users_.reset( new anyvalue_db::Table() );
+
+    auto b = users_->init( std::vector<anyvalue_db::field_id_t>( { User::USER_ID, User::LOGIN, User::REGISTRATION_KEY } ));
 
     return b;
 }
@@ -55,9 +57,9 @@ bool UserManager::load(
         const std::string   & filename,
         std::string         * error_msg )
 {
-    anyvalue_db::Table  users;
+    std::unique_ptr<anyvalue_db::Table> users( new anyvalue_db::Table() );
 
-    auto b = users.init( filename );
+    auto b = users->init( filename );
 
     if( b == false )
     {
@@ -65,7 +67,7 @@ bool UserManager::load(
         return false;
     }
 
-    users_  = users;
+    users_.reset( users.release() );
 
     return b;
 }
@@ -78,11 +80,11 @@ bool UserManager::create_and_add_user(
         user_id_t           * user_id,
         std::string         * error_msg )
 {
-    auto & mutex = users_.get_mutex();
+    auto & mutex = users_->get_mutex();
 
     MUTEX_SCOPE_LOCK( mutex );
 
-    auto rec = users_.find__unlocked( User::LOGIN, login );
+    auto rec = users_->find__unlocked( User::LOGIN, login );
 
     if( rec != nullptr )
     {
@@ -97,7 +99,7 @@ bool UserManager::create_and_add_user(
 
     User user( id, group_id, true, login, password_hash, registration_key, utils::get_now_epoch() );
 
-    auto b = user.insert_into( & users_, error_msg );
+    auto b = user.insert_into( users_.get(), error_msg );
 
     if( b == false )
     {
@@ -115,16 +117,16 @@ bool UserManager::create_and_add_user(
 
 bool UserManager::delete_user( user_id_t user_id, std::string * error_msg )
 {
-    auto & mutex = users_.get_mutex();
+    auto & mutex = users_->get_mutex();
 
     MUTEX_SCOPE_LOCK( mutex );
 
-    return users_.delete_record__unlocked( User::USER_ID, anyvalue::Value( user_id ), error_msg );
+    return users_->delete_record__unlocked( User::USER_ID, anyvalue::Value( int( user_id ) ), error_msg );
 }
 
 User UserManager::find__unlocked( user_id_t user_id )
 {
-    auto rec = users_.find__unlocked( User::USER_ID, anyvalue::Value( user_id ) );
+    auto rec = users_->find__unlocked( User::USER_ID, anyvalue::Value( int( user_id ) ) );
 
     if( rec != nullptr )
         return User( rec );
@@ -134,7 +136,7 @@ User UserManager::find__unlocked( user_id_t user_id )
 
 User UserManager::find__unlocked( user_id_t user_id ) const
 {
-    auto rec = users_.find__unlocked( User::USER_ID, anyvalue::Value( user_id ) );
+    auto rec = users_->find__unlocked( User::USER_ID, anyvalue::Value( int( user_id ) ) );
 
     if( rec != nullptr )
         return User( rec );
@@ -144,7 +146,7 @@ User UserManager::find__unlocked( user_id_t user_id ) const
 
 User UserManager::find__unlocked( const std::string & login )
 {
-    auto rec = users_.find__unlocked( User::LOGIN, anyvalue::Value( login ) );
+    auto rec = users_->find__unlocked( User::LOGIN, anyvalue::Value( login ) );
 
     if( rec != nullptr )
         return User( rec );
@@ -154,7 +156,7 @@ User UserManager::find__unlocked( const std::string & login )
 
 User UserManager::find__unlocked( const std::string & login ) const
 {
-    auto rec = users_.find__unlocked( User::LOGIN, anyvalue::Value( login ) );
+    auto rec = users_->find__unlocked( User::LOGIN, anyvalue::Value( login ) );
 
     if( rec != nullptr )
         return User( rec );
@@ -164,7 +166,7 @@ User UserManager::find__unlocked( const std::string & login ) const
 
 User UserManager::find_regkey__unlocked( const std::string & regkey )
 {
-    auto rec = users_.find__unlocked( User::REGISTRATION_KEY, anyvalue::Value( regkey ) );
+    auto rec = users_->find__unlocked( User::REGISTRATION_KEY, anyvalue::Value( regkey ) );
 
     if( rec != nullptr )
         return User( rec );
@@ -174,7 +176,7 @@ User UserManager::find_regkey__unlocked( const std::string & regkey )
 
 User UserManager::find_regkey__unlocked( const std::string & regkey ) const
 {
-    auto rec = users_.find__unlocked( User::REGISTRATION_KEY, anyvalue::Value( regkey ) );
+    auto rec = users_->find__unlocked( User::REGISTRATION_KEY, anyvalue::Value( regkey ) );
 
     if( rec != nullptr )
         return User( rec );
@@ -186,7 +188,7 @@ std::vector<User> UserManager::select_users__unlocked( const User::field_e field
 {
     std::vector<User>  res;
 
-    auto recs = users_.select__unlocked( field_id, op, value );
+    auto recs = users_->select__unlocked( field_id, op, value );
 
     for( auto r : recs )
     {
@@ -198,7 +200,7 @@ std::vector<User> UserManager::select_users__unlocked( const User::field_e field
 
 std::mutex & UserManager::get_mutex() const
 {
-    return users_.get_mutex();
+    return users_->get_mutex();
 }
 
 bool UserManager::is_inited__() const
@@ -208,7 +210,7 @@ bool UserManager::is_inited__() const
 
 bool UserManager::save( std::string * error_msg, const std::string & filename ) const
 {
-    return users_.save( error_msg, filename );
+    return users_->save( error_msg, filename );
 }
 
 

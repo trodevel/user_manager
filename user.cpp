@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11884 $ $Date:: 2019-08-16 #$ $Author: serge $
+// $Revision: 11905 $ $Date:: 2019-08-20 #$ $Author: serge $
 
 #include "user.h"           // self
 
@@ -52,7 +52,7 @@ User::User(
     record_->add_field( LOGIN,              anyvalue::Value( login ) );
     record_->add_field( PASSWORD_HASH,      anyvalue::Value( password_hash ) );
     record_->add_field( REGISTRATION_KEY,   anyvalue::Value( registration_key ) );
-    record_->add_field( CREATION_TIME,      anyvalue::Value( creation_time ) );
+    record_->add_field( CREATION_TIME,      anyvalue::Value( int ( creation_time ) ) );
 
     cache_.user_id          = user_id;
     cache_.group_id         = group_id;
@@ -176,7 +176,7 @@ bool User::get_field( const field_e field_id, Value * res ) const
     return record_->get_field( field_id, res );
 }
 
-const Value & User::get_field( const field_e field_id ) const
+Value User::get_field( const field_e field_id ) const
 {
     static const Value empty( 0 );
 
@@ -204,6 +204,30 @@ bool User::delete_field( const field_e field_id )
 {
     return record_->delete_field( field_id );
 }
+
+bool User::add_field( const field_e field_id, bool value )
+{
+    return add_field( field_id, anyvalue::Value( value ) );
+}
+
+bool User::add_field( const field_e field_id, int value )
+{
+    return add_field( field_id, anyvalue::Value( value ) );
+}
+
+bool User::add_field( const field_e field_id, double value )
+{
+    return add_field( field_id, anyvalue::Value( value ) );
+}
+
+bool User::add_field( const field_e field_id, const std::string & value )
+{
+    return add_field( field_id, anyvalue::Value( value ) );
+}
+
+bool User::add_field( const field_e field_id, int value );
+bool User::add_field( const field_e field_id, double value );
+bool User::add_field( const field_e field_id, const std::string & value );
 
 bool User::insert_into( anyvalue_db::Table * table, std::string * error_msg )
 {

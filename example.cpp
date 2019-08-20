@@ -8,20 +8,20 @@ user_manager::User * create_user_1( user_manager::UserManager * um, std::string 
 {
     user_manager::user_id_t id;
 
-    um->create_and_add_user( 1, "test", "\xf0\xf0\xf0", & id, error_msg );
+    um->create_and_add_user( 1, "test", "\xf0\xf0\xf0", "abcd-1234", & id, error_msg );
 
     auto res = um->find__unlocked( id );
 
-    res->add_field( user_manager::User::STATUS, int( user_manager::status_e::ACTIVE ) );
-    res->add_field( user_manager::User::GENDER, int( user_manager::gender_e::MALE ) );
-    res->add_field( user_manager::User::LAST_NAME,      "Doe" );
-    res->add_field( user_manager::User::FIRST_NAME,     "John" );
-    res->add_field( user_manager::User::COMPANY_NAME,   "Yoyodyne Inc." );
-    res->add_field( user_manager::User::EMAIL,          "john.doe@yoyodyne.com" );
-    //res->email_2 );
-    res->add_field( user_manager::User::PHONE,          "+1234567890" );
-    //res->phone_2 );
-    res->add_field( user_manager::User::TIMEZONE,       "Europe/Berlin" );
+    res.add_field( user_manager::User::STATUS, int( user_manager::status_e::ACTIVE ) );
+    res.add_field( user_manager::User::GENDER, int( user_manager::gender_e::MALE ) );
+    res.add_field( user_manager::User::LAST_NAME,       "Doe" );
+    res.add_field( user_manager::User::FIRST_NAME,      "John" );
+    res.add_field( user_manager::User::COMPANY_NAME,    "Yoyodyne Inc." );
+    res.add_field( user_manager::User::EMAIL,           "john.doe@yoyodyne.com" );
+    //res.email_2 );
+    res.add_field( user_manager::User::PHONE,           "+1234567890" );
+    //res.phone_2 );
+    res.add_field( user_manager::User::TIMEZONE,        "Europe/Berlin" );
 
     return res;
 }
@@ -30,21 +30,21 @@ user_manager::User * create_user_2( user_manager::UserManager * um, std::string 
 {
     user_manager::user_id_t id;
 
-    um->create_and_add_user( 1, "test2", "\xae\xae\xae", & id, error_msg );
+    um->create_and_add_user( 1, "test2", "\xae\xae\xae", "defg-4567", & id, error_msg );
 
     auto res = um->find__unlocked( id );
 
     static const int PHONE_2    = user_manager::User::USER_DEFINED_FIELD_ID_BASE + 1;
 
-    res->add_field( user_manager::User::STATUS,         int( user_manager::status_e::ACTIVE ) );
-    res->add_field( user_manager::User::GENDER,         int( user_manager::gender_e::FEMALE ) );
-    res->add_field( user_manager::User::LAST_NAME,      "Bowie" );
-    res->add_field( user_manager::User::FIRST_NAME,     "Doris" );
-    res->add_field( user_manager::User::COMPANY_NAME,   "Yoyodyne Inc." );
-    res->add_field( user_manager::User::EMAIL,          "doris.bowie@yoyodyne.com" );
-    res->add_field( user_manager::User::PHONE,          "+9876542310" );
-    res->add_field( user_manager::User::field_e(PHONE_2),   "+877777777" );
-    res->add_field( user_manager::User::TIMEZONE,       "Europe/London" );
+    res.add_field( user_manager::User::STATUS,          int( user_manager::status_e::ACTIVE ) );
+    res.add_field( user_manager::User::GENDER,          int( user_manager::gender_e::FEMALE ) );
+    res.add_field( user_manager::User::LAST_NAME,       "Bowie" );
+    res.add_field( user_manager::User::FIRST_NAME,      "Doris" );
+    res.add_field( user_manager::User::COMPANY_NAME,    "Yoyodyne Inc." );
+    res.add_field( user_manager::User::EMAIL,           "doris.bowie@yoyodyne.com" );
+    res.add_field( user_manager::User::PHONE,           "+9876542310" );
+    res.add_field( user_manager::User::field_e(PHONE_2),   "+877777777" );
+    res.add_field( user_manager::User::TIMEZONE,        "Europe/London" );
 
     return res;
 }

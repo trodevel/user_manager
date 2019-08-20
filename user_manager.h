@@ -19,16 +19,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11891 $ $Date:: 2019-08-19 #$ $Author: serge $
+// $Revision: 11901 $ $Date:: 2019-08-20 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
 
 #include <mutex>            // std::mutex
-#include <map>              // std::map
+#include <memory>           // std::unique_ptr
 
 #include "user.h"           // User
-#include "status.h"         // Status
 
 #include "anyvalue/operations.h"    // anyvalue::comparison_type_e
 #include "anyvalue_db/table.h"      // anyvalue_db::Table
@@ -85,7 +84,7 @@ private:
     // Config
     std::string                 credentials_file_;
 
-    anyvalue_db::Table          users_;
+    std::unique_ptr<anyvalue_db::Table> users_;
 
     utils::RequestIdGen         req_id_gen_;
 };

@@ -19,12 +19,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11719 $ $Date:: 2019-06-06 #$ $Author: serge $
+// $Revision: 11896 $ $Date:: 2019-08-20 #$ $Author: serge $
 
 #ifndef USER_MANAGER_STR_HELPER_H
 #define USER_MANAGER_STR_HELPER_H
 
 #include <string>
+#include <sstream>              // std::ostringstream
 
 #include "user.h"
 
@@ -37,7 +38,19 @@ public:
     static const std::string & to_string( status_e l );
     static const std::string & to_string( gender_e l );
     static std::string to_string( User::field_e l );
-    static std::string to_string( const User & l );
+
+    static std::ostream & write( std::ostream & os, const User & l );
+
+    template<class T>
+    static std::string to_string( const T & l )
+    {
+        std::ostringstream os;
+
+        write( os, l );
+
+        return os.str();
+    }
+
 };
 
 } // namespace user_manager

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11893 $ $Date:: 2019-08-19 #$ $Author: serge $
+// $Revision: 11895 $ $Date:: 2019-08-20 #$ $Author: serge $
 
 #include "str_helper.h"             // self
 
@@ -80,6 +80,14 @@ std::string StrHelper::to_string( User::field_e l )
     static Map m =
     {
         { Type:: TUPLE_VAL_STR( UNDEF ) },
+        { Type:: TUPLE_VAL_STR( USER_ID ) },
+        { Type:: TUPLE_VAL_STR( GROUP_ID ) },
+        { Type:: TUPLE_VAL_STR( LOGIN ) },
+        { Type:: TUPLE_VAL_STR( PASSWORD_HASH ) },
+        { Type:: TUPLE_VAL_STR( IS_OPEN ) },
+        { Type:: TUPLE_VAL_STR( CREATION_TIME ) },
+        { Type:: TUPLE_VAL_STR( MODIFICATION_TIME ) },
+        { Type:: TUPLE_VAL_STR( STATUS ) },
         { Type:: TUPLE_VAL_STR( GENDER ) },
         { Type:: TUPLE_VAL_STR( TITLE ) },
         { Type:: TUPLE_VAL_STR( FIRST_NAME ) },
@@ -94,7 +102,8 @@ std::string StrHelper::to_string( User::field_e l )
         { Type:: TUPLE_VAL_STR( STREET ) },
         { Type:: TUPLE_VAL_STR( HOUSE_NUMBER ) },
         { Type:: TUPLE_VAL_STR( EAL ) },
-        { Type:: TUPLE_VAL_STR( USER_DEFINED_FIELD_ID_BASE ) },
+        { Type:: TUPLE_VAL_STR( REGISTRATION_KEY ) },
+        { Type:: TUPLE_VAL_STR( REGISTRATION_EXPIRATION ) },
     };
 
     auto it = m.find( l );
@@ -105,22 +114,20 @@ std::string StrHelper::to_string( User::field_e l )
     return it->second;
 }
 
-std::string StrHelper::to_string( const User & u )
+std::ostream & StrHelper::write( std::ostream & os, const User & u )
 {
-    std::ostringstream s;
-
-    s << "user_id " << u.get_user_id()
+    os << "user_id " << u.get_user_id()
     << " group_id " << u.get_group_id()
     << " is_open " << int( u.is_open() )
     << " login " << u.get_login()
     << " password_hash " << "...";
 
-    for( auto e : u.map_id_to_value_ )
-    {
-        s << to_string( e.first ) << " " << anyvalue::StrHelper::to_string( e.second ) << " ";
-    }
+//    for( auto e : u.record_ )
+//    {
+//        os << to_string( e.first ) << " " << anyvalue::StrHelper::to_string( e.second ) << " ";
+//    }
 
-    return s.str();
+    return os;
 }
 
 } // namespace user_manager

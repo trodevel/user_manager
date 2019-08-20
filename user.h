@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11884 $ $Date:: 2019-08-16 #$ $Author: serge $
+// $Revision: 11905 $ $Date:: 2019-08-20 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -112,10 +112,16 @@ struct User
 
     bool has_field( const field_e field_id ) const;
     bool get_field( const field_e field_id, Value * res ) const;
-    const Value & get_field( const field_e field_id ) const;
+    Value get_field( const field_e field_id ) const;
     bool add_field( const field_e field_id, const Value & value );
     bool update_field( const field_e field_id, const Value & value );
     bool delete_field( const field_e field_id );
+
+    bool add_field( const field_e field_id, bool value );
+    bool add_field( const field_e field_id, int value );
+    bool add_field( const field_e field_id, double value );
+    bool add_field( const field_e field_id, const std::string & value );
+
 
     bool insert_into( anyvalue_db::Table * table, std::string * error_msg );
 
@@ -160,7 +166,7 @@ private:
     anyvalue_db::Record *record_;
     bool                is_inserted_;
 
-    Cache               cache_;
+    mutable Cache       cache_;
 };
 
 } // namespace user_manager
