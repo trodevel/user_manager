@@ -4,7 +4,34 @@
 #include "user_manager.h"       //
 #include "str_helper.h"         // StrHelper
 
-user_manager::User * create_user_1( user_manager::UserManager * um, std::string * error_msg )
+void log_test(
+        const std::string   & test_name,
+        bool                res,
+        bool                expected_res,
+        const std::string   & exp_msg,
+        const std::string   & not_exp_msg,
+        const std::string   & error_msg )
+{
+    std::cout << "log_test: "<< test_name << " - ";
+
+    if( res == expected_res )
+    {
+        std::cout << "OK: " << exp_msg;
+    }
+    else
+    {
+        std::cout << "ERROR: " << not_exp_msg;
+    }
+
+    if( ! error_msg.empty() )
+    {
+        std::cout << ": " << error_msg;
+    }
+
+    std::cout << std::endl;
+}
+
+user_manager::User create_user_1( user_manager::UserManager * um, std::string * error_msg )
 {
     user_manager::user_id_t id;
 
@@ -26,7 +53,7 @@ user_manager::User * create_user_1( user_manager::UserManager * um, std::string 
     return res;
 }
 
-user_manager::User * create_user_2( user_manager::UserManager * um, std::string * error_msg )
+user_manager::User create_user_2( user_manager::UserManager * um, std::string * error_msg )
 {
     user_manager::user_id_t id;
 
@@ -53,7 +80,11 @@ void test_2()
 {
     user_manager::UserManager m;
 
-    auto b = m.init( "users.duplicate_id.dat" );
+    m.init();
+
+    std::string error_msg;
+
+    auto b = m.load( "users.duplicate_id.dat", & error_msg );
 
     if( b )
     {
@@ -69,9 +100,9 @@ void test_3( user_manager::UserManager & m )
 {
     auto u = m.find__unlocked( "testuser" );
 
-    if( u )
+    if( ! u.is_empty() )
     {
-        std::cout << "OK: found user: " << user_manager::StrHelper::to_string( * u ) << std::endl;
+        std::cout << "OK: found user: " << user_manager::StrHelper::to_string( u ) << std::endl;
     }
     else
     {
@@ -83,9 +114,9 @@ void test_4( user_manager::UserManager & m )
 {
     auto u = m.find__unlocked( 2849000613 );
 
-    if( u )
+    if( ! u.is_empty() )
     {
-        std::cout << "OK: found user: " << user_manager::StrHelper::to_string( * u ) << std::endl;
+        std::cout << "OK: found user: " << user_manager::StrHelper::to_string( u ) << std::endl;
     }
     else
     {
@@ -94,9 +125,11 @@ void test_4( user_manager::UserManager & m )
 }
 
 
-void test_5()
+void test_1_save_ok_1()
 {
     user_manager::UserManager m;
+
+    m.init();
 
     std::string error_msg;
 
@@ -105,14 +138,7 @@ void test_5()
 
     auto b = m.save( & error_msg, "test.dat" );
 
-    if( b )
-    {
-        std::cout << "OK: user file was written" << std::endl;
-    }
-    else
-    {
-        std::cout << "ERROR: cannot write file: " << error_msg << std::endl;
-    }
+    log_test( "test_1_save_ok_1", b, true, "user file was written", "cannot write file", error_msg );
 }
 
 void test_6( const user_manager::UserManager & m )
@@ -125,7 +151,11 @@ void test_7()
 {
     user_manager::UserManager m;
 
-    auto b = m.init( "users_new.dat" );
+    m.init();
+
+    std::string error_msg;
+
+    auto b = m.load( "users_new.dat", & error_msg );
 
     if( b )
     {
@@ -141,7 +171,11 @@ void test_8()
 {
     user_manager::UserManager m;
 
-    auto b = m.init( "users.duplicate_login.dat" );
+    m.init();
+
+    std::string error_msg;
+
+    auto b = m.load( "users.duplicate_login.dat", & error_msg );
 
     if( b )
     {
@@ -157,22 +191,27 @@ int main( int argc, const char* argv[] )
 {
     user_manager::UserManager m;
 
-    auto b = m.init( "users.v2.dat" );
 
-    if( b )
-    {
-        std::cout << "OK: user file was loaded" << std::endl;
-    }
-    else
-    {
-        std::cout << "ERROR: cannot load users" << std::endl;
-        return -1;
-    }
+//    m.init();
+//
+//    std::string error_msg;
+//
+//    auto b = m.load( "users.v2.dat", & error_msg );
+//
+//    if( b )
+//    {
+//        std::cout << "OK: user file was loaded" << std::endl;
+//    }
+//    else
+//    {
+//        std::cout << "ERROR: cannot load users" << std::endl;
+//        return -1;
+//    }
 
-    test_2();
-    test_3( m );
-    test_4( m );
-    test_5();
+//    test_2();
+//    test_3( m );
+//    test_4( m );
+    test_1_save_ok_1();
     test_6( m );
     test_7();
     test_8();

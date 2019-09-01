@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11905 $ $Date:: 2019-08-20 #$ $Author: serge $
+// $Revision: 11916 $ $Date:: 2019-08-30 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -124,6 +124,8 @@ struct User
 
 
     bool insert_into( anyvalue_db::Table * table, std::string * error_msg );
+
+    bool insert_into__unlocked( anyvalue_db::Table * table, std::string * error_msg );
 
 private:
 

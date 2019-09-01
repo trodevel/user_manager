@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11905 $ $Date:: 2019-08-20 #$ $Author: serge $
+// $Revision: 11916 $ $Date:: 2019-08-30 #$ $Author: serge $
 
 #include "user.h"           // self
 
@@ -225,10 +225,6 @@ bool User::add_field( const field_e field_id, const std::string & value )
     return add_field( field_id, anyvalue::Value( value ) );
 }
 
-bool User::add_field( const field_e field_id, int value );
-bool User::add_field( const field_e field_id, double value );
-bool User::add_field( const field_e field_id, const std::string & value );
-
 bool User::insert_into( anyvalue_db::Table * table, std::string * error_msg )
 {
     if( is_inserted_ == true )
@@ -241,6 +237,27 @@ bool User::insert_into( anyvalue_db::Table * table, std::string * error_msg )
     }
 
     auto b = table->add_record( record_, error_msg );
+
+    if( b )
+    {
+        is_inserted_    = true;
+    }
+
+    return b;
+}
+
+bool User::insert_into__unlocked( anyvalue_db::Table * table, std::string * error_msg )
+{
+    if( is_inserted_ == true )
+    {
+        assert( 0 );    // should not happen
+
+        * error_msg = "record is already inserted";
+
+        return false;
+    }
+
+    auto b = table->add_record__unlocked( record_, error_msg );
 
     if( b )
     {

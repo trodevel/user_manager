@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11903 $ $Date:: 2019-08-20 #$ $Author: serge $
+// $Revision: 11917 $ $Date:: 2019-08-30 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -57,6 +57,8 @@ bool UserManager::load(
         const std::string   & filename,
         std::string         * error_msg )
 {
+    assert( is_inited__() );
+
     std::unique_ptr<anyvalue_db::Table> users( new anyvalue_db::Table() );
 
     auto b = users->init( filename );
@@ -80,6 +82,8 @@ bool UserManager::create_and_add_user(
         user_id_t           * user_id,
         std::string         * error_msg )
 {
+    assert( is_inited__() );
+
     auto & mutex = users_->get_mutex();
 
     MUTEX_SCOPE_LOCK( mutex );
@@ -99,7 +103,7 @@ bool UserManager::create_and_add_user(
 
     User user( id, group_id, true, login, password_hash, registration_key, utils::get_now_epoch() );
 
-    auto b = user.insert_into( users_.get(), error_msg );
+    auto b = user.insert_into__unlocked( users_.get(), error_msg );
 
     if( b == false )
     {
@@ -117,6 +121,8 @@ bool UserManager::create_and_add_user(
 
 bool UserManager::delete_user( user_id_t user_id, std::string * error_msg )
 {
+    assert( is_inited__() );
+
     auto & mutex = users_->get_mutex();
 
     MUTEX_SCOPE_LOCK( mutex );
@@ -205,11 +211,13 @@ std::mutex & UserManager::get_mutex() const
 
 bool UserManager::is_inited__() const
 {
-    return true;
+    return users_ != nullptr;
 }
 
 bool UserManager::save( std::string * error_msg, const std::string & filename ) const
 {
+    assert( is_inited__() );
+
     return users_->save( error_msg, filename );
 }
 
