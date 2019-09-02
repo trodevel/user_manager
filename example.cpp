@@ -3,40 +3,25 @@
 
 #include "user_manager.h"       //
 #include "str_helper.h"         // StrHelper
+#include "utils/log_test.h"     // log_test
 
-void log_test(
-        const std::string   & test_name,
-        bool                res,
-        bool                expected_res,
-        const std::string   & exp_msg,
-        const std::string   & not_exp_msg,
-        const std::string   & error_msg )
+bool create_user_1( user_manager::UserManager * um, user_manager::user_id_t * id, std::string * error_msg )
 {
-    std::cout << "log_test: "<< test_name << " - ";
-
-    if( res == expected_res )
-    {
-        std::cout << "OK: " << exp_msg;
-    }
-    else
-    {
-        std::cout << "ERROR: " << not_exp_msg;
-    }
-
-    if( ! error_msg.empty() )
-    {
-        std::cout << ": " << error_msg;
-    }
-
-    std::cout << std::endl;
+    return um->create_and_add_user( 1, "test", "\xf0\xf0\xf0", "abcd-1234", id, error_msg );
 }
 
-user_manager::User create_user_1( user_manager::UserManager * um, std::string * error_msg )
+bool create_user_2( user_manager::UserManager * um, user_manager::user_id_t * id, std::string * error_msg )
 {
-    user_manager::user_id_t id;
+    return um->create_and_add_user( 1, "test2", "\xae\xae\xae", "defg-4567", id, error_msg );
+}
 
-    um->create_and_add_user( 1, "test", "\xf0\xf0\xf0", "abcd-1234", & id, error_msg );
+bool create_user_3( user_manager::UserManager * um, user_manager::user_id_t * id, std::string * error_msg )
+{
+    return um->create_and_add_user( 1, "test3", "\xff\xff\xff", "a1b2-c7d8", id, error_msg );
+}
 
+user_manager::User init_user_1( user_manager::UserManager * um, user_manager::user_id_t id, std::string * error_msg )
+{
     auto res = um->find__unlocked( id );
 
     res.add_field( user_manager::User::STATUS, int( user_manager::status_e::ACTIVE ) );
@@ -53,12 +38,8 @@ user_manager::User create_user_1( user_manager::UserManager * um, std::string * 
     return res;
 }
 
-user_manager::User create_user_2( user_manager::UserManager * um, std::string * error_msg )
+user_manager::User init_user_2( user_manager::UserManager * um, user_manager::user_id_t id, std::string * error_msg )
 {
-    user_manager::user_id_t id;
-
-    um->create_and_add_user( 1, "test2", "\xae\xae\xae", "defg-4567", & id, error_msg );
-
     auto res = um->find__unlocked( id );
 
     static const int PHONE_2    = user_manager::User::USER_DEFINED_FIELD_ID_BASE + 1;
@@ -74,6 +55,217 @@ user_manager::User create_user_2( user_manager::UserManager * um, std::string * 
     res.add_field( user_manager::User::TIMEZONE,        "Europe/London" );
 
     return res;
+}
+
+user_manager::User init_user_3( user_manager::UserManager * um, user_manager::user_id_t id, std::string * error_msg )
+{
+    auto res = um->find__unlocked( id );
+
+    res.add_field( user_manager::User::STATUS,          int( user_manager::status_e::INACTIVE ) );
+    res.add_field( user_manager::User::GENDER,          int( user_manager::gender_e::MALE ) );
+    res.add_field( user_manager::User::LAST_NAME,       "Farmer" );
+    res.add_field( user_manager::User::FIRST_NAME,      "Bogdan" );
+    res.add_field( user_manager::User::COMPANY_NAME,    "Yoyodyne Inc." );
+    res.add_field( user_manager::User::EMAIL,           "bogdan.farmer@yoyodyne.com" );
+    res.add_field( user_manager::User::PHONE,           "+9876547777" );
+    res.add_field( user_manager::User::TIMEZONE,        "Europe/Paris" );
+
+    return res;
+}
+
+void test_1_add_ok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    auto b = create_user_1( & m, & id, & error_msg );
+
+    log_test( "test_1_add_ok_1", b, true, "user was added", "cannot add user", error_msg );
+}
+
+void test_1_add_nok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+
+    auto b = create_user_1( & m, & id, & error_msg );
+
+    log_test( "test_1_add_nok_1", b, false, "user was not added", "user was unexpectedly added", error_msg );
+}
+
+void test_2_delete_ok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+
+    auto b = m.delete_user( id, & error_msg );
+
+    log_test( "test_2_delete_ok_1", b, true, "user was deleted", "cannot delete user", error_msg );
+}
+
+void test_2_delete_ok_2()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    create_user_2( & m, & id, & error_msg );
+    create_user_3( & m, & id, & error_msg );
+
+    auto b = m.delete_user( id, & error_msg );
+
+    log_test( "test_2_delete_ok_2", b, true, "user was deleted", "cannot delete user", error_msg );
+}
+
+void test_2_delete_nok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    auto b = m.delete_user( 121212, & error_msg );
+
+    log_test( "test_2_delete_nok_1", b, false, "user was not deleted", "user was unexpectedly deleted", error_msg );
+}
+
+void test_3_find_ok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    create_user_2( & m, & id, & error_msg );
+    create_user_3( & m, & id, & error_msg );
+
+    auto b = m.find__unlocked( id );
+
+    log_test( "test_3_find_ok_1", b.is_empty() == false, true, "user was found", "cannot find user", error_msg );
+}
+
+void test_3_find_ok_2()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    create_user_2( & m, & id, & error_msg );
+    create_user_3( & m, & id, & error_msg );
+
+    auto b = m.find__unlocked( "test2" );
+
+    log_test( "test_3_find_ok_2", b.is_empty() == false, true, "user was found", "cannot find user", error_msg );
+}
+
+void test_3_find_ok_3()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    create_user_2( & m, & id, & error_msg );
+    create_user_3( & m, & id, & error_msg );
+
+    auto b = m.find_regkey__unlocked( "abcd-1234" );
+
+    log_test( "test_3_find_ok_3", b.is_empty() == false, true, "user was found", "cannot find user", error_msg );
+}
+
+void test_3_find_nok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    create_user_2( & m, & id, & error_msg );
+    create_user_3( & m, & id, & error_msg );
+
+    auto b = m.find__unlocked( 121212 );
+
+    log_test( "test_3_find_nok_1", b.is_empty(), true, "non-existing user was not found", "non-existing user was unexpectedly found", error_msg );
+}
+
+void test_3_find_nok_2()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    create_user_2( & m, & id, & error_msg );
+    create_user_3( & m, & id, & error_msg );
+
+    auto b = m.find__unlocked( "test4" );
+
+    log_test( "test_3_find_nok_2", b.is_empty(), true, "non-existing user was not found", "non-existing user was unexpectedly found", error_msg );
+}
+
+void test_3_find_nok_3()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    create_user_2( & m, & id, & error_msg );
+    create_user_3( & m, & id, & error_msg );
+
+    auto b = m.find_regkey__unlocked( "abcd-5678" );
+
+    log_test( "test_3_find_nok_3", b.is_empty(), true, "non-existing user was not found", "non-existing user was unexpectedly found", error_msg );
 }
 
 void test_2()
@@ -133,8 +325,14 @@ void test_1_save_ok_1()
 
     std::string error_msg;
 
-    create_user_1( & m, & error_msg );
-    create_user_2( & m, & error_msg );
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    init_user_1( & m, id, & error_msg );
+
+    create_user_2( & m, & id, & error_msg );
+    init_user_2( & m, id, & error_msg );
 
     auto b = m.save( & error_msg, "test.dat" );
 
@@ -211,6 +409,17 @@ int main( int argc, const char* argv[] )
 //    test_2();
 //    test_3( m );
 //    test_4( m );
+    test_1_add_ok_1();
+    test_1_add_nok_1();
+    test_2_delete_ok_1();
+    test_2_delete_ok_2();
+    test_2_delete_nok_1();
+    test_3_find_ok_1();
+    test_3_find_ok_2();
+    test_3_find_ok_3();
+    test_3_find_nok_1();
+    test_3_find_nok_2();
+    test_3_find_nok_3();
     test_1_save_ok_1();
     test_6( m );
     test_7();
