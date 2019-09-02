@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11916 $ $Date:: 2019-08-30 #$ $Author: serge $
+// $Revision: 11926 $ $Date:: 2019-09-02 #$ $Author: serge $
 
 #include "user.h"           // self
 
@@ -90,7 +90,7 @@ User::~User()
 
 bool User::is_empty() const
 {
-    assert( is_inserted_ == false );
+    assert( ( record_ == nullptr && is_inserted_ == false ) || ( record_ != nullptr && is_inserted_ == true ) );
 
     return record_ == nullptr;
 }
