@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11895 $ $Date:: 2019-08-20 #$ $Author: serge $
+// $Revision: 11939 $ $Date:: 2019-09-05 #$ $Author: serge $
 
 #include "str_helper.h"             // self
 
@@ -120,12 +120,40 @@ std::ostream & StrHelper::write( std::ostream & os, const User & u )
     << " group_id " << u.get_group_id()
     << " is_open " << int( u.is_open() )
     << " login " << u.get_login()
-    << " password_hash " << "...";
+    << " password_hash " << "... ";
 
-//    for( auto e : u.record_ )
-//    {
-//        os << to_string( e.first ) << " " << anyvalue::StrHelper::to_string( e.second ) << " ";
-//    }
+    static const User::field_e fields[] =
+    {
+            User::field_e::CREATION_TIME,
+            User::field_e::MODIFICATION_TIME,
+            User::field_e::STATUS,
+            User::field_e::GENDER,
+            User::field_e::TITLE,
+            User::field_e::FIRST_NAME,
+            User::field_e::LAST_NAME,
+            User::field_e::COMPANY_NAME,
+            User::field_e::EMAIL,
+            User::field_e::PHONE,
+            User::field_e::TIMEZONE,
+            User::field_e::ZIP,
+            User::field_e::COUNTRY,
+            User::field_e::CITY,
+            User::field_e::STREET,
+            User::field_e::HOUSE_NUMBER,
+            User::field_e::EAL,
+            User::field_e::REGISTRATION_KEY,
+            User::field_e::REGISTRATION_EXPIRATION,
+    };
+
+    for( auto f : fields )
+    {
+        anyvalue::Value v;
+
+        if( u.record_->get_field( f, & v) )
+        {
+            os << to_string( f ) << "=" << anyvalue::StrHelper::to_string( v ) << " ";
+        }
+    }
 
     return os;
 }
