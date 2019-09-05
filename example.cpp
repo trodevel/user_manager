@@ -73,6 +73,18 @@ user_manager::User init_user_3( user_manager::UserManager * um, user_manager::us
     return res;
 }
 
+void dump_selection( const std::vector<user_manager::User> & vec, const std::string & comment )
+{
+    std::cout << comment << ":" << "\n";
+
+    for( auto & e : vec )
+    {
+        std::cout << user_manager::StrHelper::to_string( e ) << "\n";
+    }
+
+    std::cout << "\n";
+}
+
 void test_1_add_ok_1()
 {
     user_manager::UserManager m;
@@ -268,6 +280,110 @@ void test_3_find_nok_3()
     log_test( "test_3_find_nok_3", b.is_empty(), true, "non-existing user was not found", "non-existing user was unexpectedly found", error_msg );
 }
 
+void test_4_select_ok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    init_user_1( & m, id, & error_msg );
+
+    create_user_2( & m, & id, & error_msg );
+    init_user_2( & m, id, & error_msg );
+
+    create_user_3( & m, & id, & error_msg );
+    init_user_3( & m, id, & error_msg );
+
+    auto res = m.select_users__unlocked( user_manager::User::STATUS, anyvalue::comparison_type_e::EQ, int( user_manager::status_e::ACTIVE ) );
+
+    dump_selection( res, "users" );
+
+    log_test( "test_4_select_ok_1", res.size() == 2, true, "users were found", "users were not found", error_msg );
+}
+
+void test_4_select_ok_2()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    init_user_1( & m, id, & error_msg );
+
+    create_user_2( & m, & id, & error_msg );
+    init_user_2( & m, id, & error_msg );
+
+    create_user_3( & m, & id, & error_msg );
+    init_user_3( & m, id, & error_msg );
+
+    auto res = m.select_users__unlocked( user_manager::User::STATUS, anyvalue::comparison_type_e::EQ, int( user_manager::status_e::INACTIVE ) );
+
+    dump_selection( res, "users" );
+
+    log_test( "test_4_select_ok_2", res.size() == 1, true, "user was found", "user was not found", error_msg );
+}
+
+void test_4_select_ok_3()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    init_user_1( & m, id, & error_msg );
+
+    create_user_2( & m, & id, & error_msg );
+    init_user_2( & m, id, & error_msg );
+
+    create_user_3( & m, & id, & error_msg );
+    init_user_3( & m, id, & error_msg );
+
+    auto res = m.select_users__unlocked( user_manager::User::COMPANY_NAME, anyvalue::comparison_type_e::EQ, "Yoyodyne Inc." );
+
+    dump_selection( res, "users" );
+
+    log_test( "test_4_select_ok_3", res.size() == 3, true, "users were found", "users were not found", error_msg );
+}
+
+void test_4_select_nok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    init_user_1( & m, id, & error_msg );
+
+    create_user_2( & m, & id, & error_msg );
+    init_user_2( & m, id, & error_msg );
+
+    create_user_3( & m, & id, & error_msg );
+    init_user_3( & m, id, & error_msg );
+
+    auto res = m.select_users__unlocked( user_manager::User::COMPANY_NAME, anyvalue::comparison_type_e::NEQ, "Yoyodyne Inc." );
+
+    dump_selection( res, "users" );
+
+    log_test( "test_4_select_nok_1", res.size() == 0, true, "users were not found", "users were unexpectedly found", error_msg );
+}
+
 void test_2()
 {
     user_manager::UserManager m;
@@ -420,10 +536,14 @@ int main( int argc, const char* argv[] )
     test_3_find_nok_1();
     test_3_find_nok_2();
     test_3_find_nok_3();
+    test_4_select_ok_1();
+    test_4_select_ok_2();
+    test_4_select_ok_3();
+    test_4_select_nok_1();
     test_1_save_ok_1();
-    test_6( m );
-    test_7();
-    test_8();
+    //test_6( m );
+    //test_7();
+    //test_8();
 
     return 0;
 }
