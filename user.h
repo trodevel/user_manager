@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11916 $ $Date:: 2019-08-30 #$ $Author: serge $
+// $Revision: 11936 $ $Date:: 2019-09-05 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -120,8 +120,8 @@ struct User
     bool add_field( const field_e field_id, bool value );
     bool add_field( const field_e field_id, int value );
     bool add_field( const field_e field_id, double value );
+    bool add_field( const field_e field_id, const char * value );
     bool add_field( const field_e field_id, const std::string & value );
-
 
     bool insert_into( anyvalue_db::Table * table, std::string * error_msg );
 

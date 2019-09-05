@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11926 $ $Date:: 2019-09-02 #$ $Author: serge $
+// $Revision: 11936 $ $Date:: 2019-09-05 #$ $Author: serge $
 
 #include "user.h"           // self
 
@@ -216,6 +216,11 @@ bool User::add_field( const field_e field_id, int value )
 }
 
 bool User::add_field( const field_e field_id, double value )
+{
+    return add_field( field_id, anyvalue::Value( value ) );
+}
+
+bool User::add_field( const field_e field_id, const char * value )
 {
     return add_field( field_id, anyvalue::Value( value ) );
 }
