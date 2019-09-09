@@ -384,63 +384,13 @@ void test_4_select_nok_1()
     log_test( "test_4_select_nok_1", res.size() == 0, true, "users were not found", "users were unexpectedly found", error_msg );
 }
 
-void test_2()
+void test_5_save_ok_1()
 {
     user_manager::UserManager m;
 
     m.init();
 
     std::string error_msg;
-
-    auto b = m.load( "users.duplicate_id.dat", & error_msg );
-
-    if( b )
-    {
-        std::cout << "ERROR: file w/ broken IDs was unexpectedly loaded" << std::endl;
-    }
-    else
-    {
-        std::cout << "OK: file w/ broken IDs was not loaded (as expected)" << std::endl;
-    }
-}
-
-void test_3( user_manager::UserManager & m )
-{
-    auto u = m.find__unlocked( "testuser" );
-
-    if( ! u.is_empty() )
-    {
-        std::cout << "OK: found user: " << user_manager::StrHelper::to_string( u ) << std::endl;
-    }
-    else
-    {
-        std::cout << "ERROR: cannot find user" << std::endl;
-    }
-}
-
-void test_4( user_manager::UserManager & m )
-{
-    auto u = m.find__unlocked( 2849000613 );
-
-    if( ! u.is_empty() )
-    {
-        std::cout << "OK: found user: " << user_manager::StrHelper::to_string( u ) << std::endl;
-    }
-    else
-    {
-        std::cout << "ERROR: cannot find user" << std::endl;
-    }
-}
-
-
-void test_1_save_ok_1()
-{
-    user_manager::UserManager m;
-
-    m.init();
-
-    std::string error_msg;
-
 
     user_manager::user_id_t id;
 
@@ -452,16 +402,10 @@ void test_1_save_ok_1()
 
     auto b = m.save( & error_msg, "test.dat" );
 
-    log_test( "test_1_save_ok_1", b, true, "user file was written", "cannot write file", error_msg );
+    log_test( "test_5_save_ok_1", b, true, "user file was written", "cannot write file", error_msg );
 }
 
-void test_6( const user_manager::UserManager & m )
-{
-    std::string error_msg;
-    m.save( & error_msg, "users_new.dat" );
-}
-
-void test_7()
+void test_5_save_ok_2()
 {
     user_manager::UserManager m;
 
@@ -469,19 +413,12 @@ void test_7()
 
     std::string error_msg;
 
-    auto b = m.load( "users_new.dat", & error_msg );
+    auto b = m.save( & error_msg, "test_empty.dat" );
 
-    if( b )
-    {
-        std::cout << "OK: user file was loaded" << std::endl;
-    }
-    else
-    {
-        std::cout << "ERROR: cannot load users" << std::endl;
-    }
+    log_test( "test_5_save_ok_2", b, true, "user file was written", "cannot write file", error_msg );
 }
 
-void test_8()
+void test_6_load_ok_1()
 {
     user_manager::UserManager m;
 
@@ -489,42 +426,82 @@ void test_8()
 
     std::string error_msg;
 
-    auto b = m.load( "users.duplicate_login.dat", & error_msg );
+    auto b = m.load( "test.dat", & error_msg );
 
-    if( b )
-    {
-        std::cout << "ERROR: file w/ duplicate logins was unexpectedly loaded" << std::endl;
-    }
-    else
-    {
-        std::cout << "OK: file w/ duplicate logins was not loaded (as expected)" << std::endl;
-    }
+    log_test( "test_6_load_ok_1", b, true, "user file was loaded", "cannot load file", error_msg );
+}
+
+void test_6_load_ok_2()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    auto b = m.load( "test_empty.dat", & error_msg );
+
+    log_test( "test_6_load_ok_2", b, true, "user file was loaded", "cannot load file", error_msg );
+}
+
+void test_6_load_nok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    auto b = m.load( "test_missing.dat", & error_msg );
+
+    log_test( "test_6_load_nok_1", b, false, "non-existing user file was not loaded", "non-existing user file was unexpectedly loaded", error_msg );
+}
+
+void test_7_load_add_save_ok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    auto b = m.load( "test.dat", & error_msg );
+
+    log_test( "test_7_load_add_save_ok_1: 1", b, true, "user file was loaded", "cannot load file", error_msg );
+
+    user_manager::user_id_t id;
+
+    create_user_3( & m, & id, & error_msg );
+    init_user_3( & m, id, & error_msg );
+
+    b = m.save( & error_msg, "test_new.dat" );
+
+    log_test( "test_7_load_add_save_ok_1: 2", b, true, "user file was written", "cannot write file", error_msg );
+}
+
+void test_8_load_add_nok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    auto b = m.load( "test.dat", & error_msg );
+
+    log_test( "test_8_load_add_nok_1: 1", b, true, "user file was loaded", "cannot load file", error_msg );
+
+    user_manager::user_id_t id;
+
+    b = create_user_1( & m, & id, & error_msg );
+
+    log_test( "test_8_load_add_nok_1: 2", b, false, "user with duplicate login cannot be added", "unexpectedly added a user with duplicate login", error_msg );
 }
 
 int main( int argc, const char* argv[] )
 {
     user_manager::UserManager m;
 
-
-//    m.init();
-//
-//    std::string error_msg;
-//
-//    auto b = m.load( "users.v2.dat", & error_msg );
-//
-//    if( b )
-//    {
-//        std::cout << "OK: user file was loaded" << std::endl;
-//    }
-//    else
-//    {
-//        std::cout << "ERROR: cannot load users" << std::endl;
-//        return -1;
-//    }
-
-//    test_2();
-//    test_3( m );
-//    test_4( m );
     test_1_add_ok_1();
     test_1_add_nok_1();
     test_2_delete_ok_1();
@@ -540,10 +517,13 @@ int main( int argc, const char* argv[] )
     test_4_select_ok_2();
     test_4_select_ok_3();
     test_4_select_nok_1();
-    test_1_save_ok_1();
-    //test_6( m );
-    //test_7();
-    //test_8();
+    test_5_save_ok_1();
+    test_5_save_ok_2();
+    test_6_load_ok_1();
+    test_6_load_ok_2();
+    test_6_load_nok_1();
+    test_7_load_add_save_ok_1();
+    test_8_load_add_nok_1();
 
     return 0;
 }
