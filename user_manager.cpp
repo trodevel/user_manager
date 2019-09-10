@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11917 $ $Date:: 2019-08-30 #$ $Author: serge $
+// $Revision: 11972 $ $Date:: 2019-09-10 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -68,6 +68,18 @@ bool UserManager::load(
         * error_msg = "cannot load " + filename;
         return false;
     }
+
+    anyvalue::Value last_id;
+
+    b = users->get_meta_key( LAST_ID, & last_id );
+
+    if( b == false )
+    {
+        * error_msg = "LAST_ID is missing";
+        return false;
+    }
+
+    req_id_gen_.init( last_id.arg_i, 1 );
 
     users_.reset( users.release() );
 
@@ -217,6 +229,8 @@ bool UserManager::is_inited__() const
 bool UserManager::save( std::string * error_msg, const std::string & filename ) const
 {
     assert( is_inited__() );
+
+    users_->set_meta_key( LAST_ID, int( req_id_gen_.get_last_request_id() ) );
 
     return users_->save( error_msg, filename );
 }

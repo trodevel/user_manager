@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11901 $ $Date:: 2019-08-20 #$ $Author: serge $
+// $Revision: 11971 $ $Date:: 2019-09-10 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -75,6 +75,13 @@ public:
     bool save( std::string * error_msg, const std::string & filename ) const;
 
     std::mutex & get_mutex() const;
+
+private:
+
+    enum Metakeys
+    {
+        LAST_ID = 777,
+    };
 
 private:
 
