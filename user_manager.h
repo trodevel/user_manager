@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11971 $ $Date:: 2019-09-10 #$ $Author: serge $
+// $Revision: 12001 $ $Date:: 2019-09-16 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -28,6 +28,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <memory>           // std::unique_ptr
 
 #include "user.h"           // User
+#include "i_id_converter.h"         // IIdConverter
 
 #include "anyvalue/operations.h"    // anyvalue::comparison_type_e
 #include "anyvalue_db/table.h"      // anyvalue_db::Table
@@ -37,7 +38,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 namespace user_manager
 {
 
-class UserManager
+class UserManager: public IIdConverter
 {
     friend class Serializer;
 
@@ -51,6 +52,8 @@ public:
     bool load(
             const std::string   & filename,
             std::string         * error_msg );
+
+    user_id_t convert_login_to_user_id( const std::string & login, bool is_case_sensitive ) const override;
 
     bool create_and_add_user(
             group_id_t          group_id,

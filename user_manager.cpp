@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11972 $ $Date:: 2019-09-10 #$ $Author: serge $
+// $Revision: 12002 $ $Date:: 2019-09-16 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -27,6 +27,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "utils/dummy_logger.h"         // dummy_log
 #include "utils/utils_assert.h"               // ASSERT
 #include "utils/get_now_epoch.h"        // get_now_epoch()
+#include "utils/to_lower.h"             // utils::to_lower
 #include "anyvalue/value_operations.h"  // anyvalue::compare_values
 
 #define MODULENAME      "UserManager"
@@ -84,6 +85,24 @@ bool UserManager::load(
     users_.reset( users.release() );
 
     return b;
+}
+
+user_id_t UserManager::convert_login_to_user_id( const std::string & login, bool is_case_sensitive ) const
+{
+    auto l = is_case_sensitive ? login : utils::to_lower( login );
+
+    assert( is_inited__() );
+
+    auto & mutex = users_->get_mutex();
+
+    MUTEX_SCOPE_LOCK( mutex );
+
+    auto user = find__unlocked( l );
+
+    if( user.is_empty() )
+        return 0;
+
+    return user.get_user_id();
 }
 
 bool UserManager::create_and_add_user(
