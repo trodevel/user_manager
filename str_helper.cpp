@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11939 $ $Date:: 2019-09-05 #$ $Author: serge $
+// $Revision: 12022 $ $Date:: 2019-09-19 #$ $Author: serge $
 
 #include "str_helper.h"             // self
 
@@ -39,7 +39,7 @@ const std::string & StrHelper::to_string( status_e l )
     {
         { status_e:: TUPLE_VAL_STR( INACTIVE ) },
         { status_e:: TUPLE_VAL_STR( ACTIVE ) },
-        { status_e:: TUPLE_VAL_STR( WAITING_REGISTRATION ) },
+        { status_e:: TUPLE_VAL_STR( WAITING_REGISTRATION_CONFIRMATION ) },
     };
 
     auto it = m.find( l );
@@ -104,6 +104,7 @@ std::string StrHelper::to_string( User::field_e l )
         { Type:: TUPLE_VAL_STR( EAL ) },
         { Type:: TUPLE_VAL_STR( REGISTRATION_KEY ) },
         { Type:: TUPLE_VAL_STR( REGISTRATION_EXPIRATION ) },
+        { Type:: TUPLE_VAL_STR( REGISTRATION_TIME ) },
     };
 
     auto it = m.find( l );
@@ -143,6 +144,7 @@ std::ostream & StrHelper::write( std::ostream & os, const User & u )
             User::field_e::EAL,
             User::field_e::REGISTRATION_KEY,
             User::field_e::REGISTRATION_EXPIRATION,
+            User::field_e::REGISTRATION_TIME,
     };
 
     for( auto f : fields )

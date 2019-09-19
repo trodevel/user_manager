@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 11936 $ $Date:: 2019-09-05 #$ $Author: serge $
+// $Revision: 12022 $ $Date:: 2019-09-19 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_H
 #define USER_MANAGER_USER_H
@@ -38,7 +38,7 @@ enum class status_e
 {
     INACTIVE    = 0,
     ACTIVE      = 1,
-    WAITING_REGISTRATION    = 2,
+    WAITING_REGISTRATION_CONFIRMATION    = 2,
 };
 
 enum class gender_e
@@ -80,6 +80,7 @@ struct User
         EAL,
         REGISTRATION_KEY,
         REGISTRATION_EXPIRATION,
+        REGISTRATION_TIME,
         USER_DEFINED_FIELD_ID_BASE  = 1000,
     };
 
