@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 12002 $ $Date:: 2019-09-16 #$ $Author: serge $
+// $Revision: 12056 $ $Date:: 2019-09-26 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -226,6 +226,20 @@ std::vector<User> UserManager::select_users__unlocked( const User::field_e field
     std::vector<User>  res;
 
     auto recs = users_->select__unlocked( field_id, op, value );
+
+    for( auto r : recs )
+    {
+        res.push_back( User( r ) );
+    }
+
+    return res;
+}
+
+std::vector<User> UserManager::select_users__unlocked( bool is_or, const std::vector<SelectCondition> & conditions ) const
+{
+    std::vector<User>  res;
+
+    auto recs = users_->select__unlocked( is_or, conditions );
 
     for( auto r : recs )
     {

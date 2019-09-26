@@ -20,6 +20,11 @@ bool create_user_3( user_manager::UserManager * um, user_manager::user_id_t * id
     return um->create_and_add_user( 1, "test3", "\xff\xff\xff", "a1b2-c7d8", id, error_msg );
 }
 
+bool create_user_4( user_manager::UserManager * um, user_manager::user_id_t * id, std::string * error_msg )
+{
+    return um->create_and_add_user( 1, "test4", "\xa1\xa1\xa1", "hgfs-uiy3", id, error_msg );
+}
+
 user_manager::User init_user_1( user_manager::UserManager * um, user_manager::user_id_t id, std::string * error_msg )
 {
     auto res = um->find__unlocked( id );
@@ -69,6 +74,22 @@ user_manager::User init_user_3( user_manager::UserManager * um, user_manager::us
     res.add_field( user_manager::User::EMAIL,           "bogdan.farmer@yoyodyne.com" );
     res.add_field( user_manager::User::PHONE,           "+9876547777" );
     res.add_field( user_manager::User::TIMEZONE,        "Europe/Paris" );
+
+    return res;
+}
+
+user_manager::User init_user_4( user_manager::UserManager * um, user_manager::user_id_t id, std::string * error_msg )
+{
+    auto res = um->find__unlocked( id );
+
+    res.add_field( user_manager::User::STATUS,          int( user_manager::status_e::INACTIVE ) );
+    res.add_field( user_manager::User::GENDER,          int( user_manager::gender_e::FEMALE ) );
+    res.add_field( user_manager::User::LAST_NAME,       "Muller" );
+    res.add_field( user_manager::User::FIRST_NAME,      "Anna" );
+    res.add_field( user_manager::User::COMPANY_NAME,    "Yoyodyne Inc." );
+    res.add_field( user_manager::User::EMAIL,           "anna.muller@yoyodyne.com" );
+    res.add_field( user_manager::User::PHONE,           "+9876548787" );
+    res.add_field( user_manager::User::TIMEZONE,        "Europe/Berlin" );
 
     return res;
 }
@@ -358,6 +379,40 @@ void test_4_select_ok_3()
     log_test( "test_4_select_ok_3", res.size() == 3, true, "users were found", "users were not found", error_msg );
 }
 
+void test_4_multi_select_ok_1()
+{
+    user_manager::UserManager m;
+
+    m.init();
+
+    std::string error_msg;
+
+    user_manager::user_id_t id;
+
+    create_user_1( & m, & id, & error_msg );
+    init_user_1( & m, id, & error_msg );
+
+    create_user_2( & m, & id, & error_msg );
+    init_user_2( & m, id, & error_msg );
+
+    create_user_3( & m, & id, & error_msg );
+    init_user_3( & m, id, & error_msg );
+
+    create_user_4( & m, & id, & error_msg );
+    init_user_4( & m, id, & error_msg );
+
+    user_manager::UserManager::SelectCondition c1 = { user_manager::User::COMPANY_NAME, anyvalue::comparison_type_e::EQ, "Yoyodyne Inc." };
+    user_manager::UserManager::SelectCondition c2 = { user_manager::User::GENDER, anyvalue::comparison_type_e::EQ, int( user_manager::gender_e::MALE ) };
+
+    std::vector<user_manager::UserManager::SelectCondition> conditions = { c1, c2 };
+
+    auto res = m.select_users__unlocked( false, conditions );
+
+    dump_selection( res, "users" );
+
+    log_test( "test_4_multi_select_ok_1", res.size() == 2, true, "users were found", "users were not found", error_msg );
+}
+
 void test_4_select_nok_1()
 {
     user_manager::UserManager m;
@@ -517,6 +572,7 @@ int main( int argc, const char* argv[] )
     test_4_select_ok_2();
     test_4_select_ok_3();
     test_4_select_nok_1();
+    test_4_multi_select_ok_1();
     test_5_save_ok_1();
     test_5_save_ok_2();
     test_6_load_ok_1();

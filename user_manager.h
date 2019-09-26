@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 12001 $ $Date:: 2019-09-16 #$ $Author: serge $
+// $Revision: 12057 $ $Date:: 2019-09-26 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -41,6 +41,10 @@ namespace user_manager
 class UserManager: public IIdConverter
 {
     friend class Serializer;
+
+public:
+
+    using SelectCondition = anyvalue_db::Table::SelectCondition;
 
 public:
 
@@ -74,6 +78,7 @@ public:
     User find_regkey__unlocked( const std::string & regkey ) const;
 
     std::vector<User> select_users__unlocked( const User::field_e field_id, anyvalue::comparison_type_e op, const Value & value ) const;
+    std::vector<User> select_users__unlocked( bool is_or, const std::vector<SelectCondition> & conditions ) const;
 
     bool save( std::string * error_msg, const std::string & filename ) const;
 
