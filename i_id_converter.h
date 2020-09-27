@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 12004 $ $Date:: 2019-09-16 #$ $Author: serge $
+// $Revision: 12061 $ $Date:: 2019-09-27 #$ $Author: serge $
 
 #ifndef LIB_USER_MANAGER__ID_CONVERTER_H
 #define LIB_USER_MANAGER__ID_CONVERTER_H
