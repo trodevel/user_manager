@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 13881 $ $Date:: 2020-09-27 #$ $Author: serge $
+// $Revision: 13884 $ $Date:: 2020-09-27 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -53,9 +53,8 @@ public:
 
     void init();
 
-    bool load(
-            const std::string   & filename,
-            std::string         * error_msg );
+    void init(
+            const std::string   & filename );
 
     user_id_t convert_login_to_user_id( const std::string & login, bool is_case_sensitive ) const override;
 

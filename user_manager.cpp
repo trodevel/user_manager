@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 13881 $ $Date:: 2020-09-27 #$ $Author: serge $
+// $Revision: 13884 $ $Date:: 2020-09-27 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -52,37 +52,34 @@ void UserManager::init()
     users_->init( std::vector<anyvalue_db::field_id_t>( { User::USER_ID, User::LOGIN, User::REGISTRATION_KEY } ));
 }
 
-bool UserManager::load(
-        const std::string   & filename,
-        std::string         * error_msg )
+void UserManager::init(
+        const std::string   & filename )
 {
     assert( is_inited__() );
 
     std::unique_ptr<anyvalue_db::Table> users( new anyvalue_db::Table() );
 
-    auto b = users->init( filename );
-
-    if( b == false )
+    try
     {
-        * error_msg = "cannot load " + filename;
-        return false;
+        users->init( filename );
+    }
+    catch( std::exception & e )
+    {
+        throw std::runtime_error( "UserManager::init: " + std::string( e.what() ) );
     }
 
     anyvalue::Value last_id;
 
-    b = users->get_meta_key( LAST_ID, & last_id );
+    auto b = users->get_meta_key( LAST_ID, & last_id );
 
     if( b == false )
     {
-        * error_msg = "LAST_ID is missing";
-        return false;
+        throw std::runtime_error( "UserManager::init: LAST_ID is missing in " + filename );
     }
 
     req_id_gen_.init( last_id.arg_i, 1 );
 
     users_.reset( users.release() );
-
-    return b;
 }
 
 user_id_t UserManager::convert_login_to_user_id( const std::string & login, bool is_case_sensitive ) const
