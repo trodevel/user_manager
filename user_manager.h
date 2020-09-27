@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 12057 $ $Date:: 2019-09-26 #$ $Author: serge $
+// $Revision: 13881 $ $Date:: 2020-09-27 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -51,7 +51,7 @@ public:
     UserManager();
     ~UserManager();
 
-    bool init();
+    void init();
 
     bool load(
             const std::string   & filename,
