@@ -55,7 +55,7 @@ void UserManager::init()
 void UserManager::init(
         const std::string   & filename )
 {
-    assert( is_inited__() );
+    assert( is_inited__() == false );
 
     std::unique_ptr<anyvalue_db::Table> users( new anyvalue_db::Table() );
 
