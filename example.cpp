@@ -480,8 +480,18 @@ void test_6_load_ok_1()
     m.init();
 
     std::string error_msg;
+    auto b = false;
 
-    auto b = m.load( "test.dat", & error_msg );
+    try
+    {
+        m.init( "test.dat" );
+
+        b = true;
+    }
+    catch( std::exception & e )
+    {
+        error_msg = e.what();
+    }
 
     log_test( "test_6_load_ok_1", b, true, "user file was loaded", "cannot load file", error_msg );
 }
@@ -494,7 +504,18 @@ void test_6_load_ok_2()
 
     std::string error_msg;
 
-    auto b = m.load( "test_empty.dat", & error_msg );
+    auto b = false;
+
+    try
+    {
+        m.init( "test_empty.dat" );
+
+        b = true;
+    }
+    catch( std::exception & e )
+    {
+        error_msg = e.what();
+    }
 
     log_test( "test_6_load_ok_2", b, true, "user file was loaded", "cannot load file", error_msg );
 }
@@ -507,7 +528,18 @@ void test_6_load_nok_1()
 
     std::string error_msg;
 
-    auto b = m.load( "test_missing.dat", & error_msg );
+    auto b = false;
+
+    try
+    {
+        m.init( "test_missing.dat" );
+
+        b = true;
+    }
+    catch( std::exception & e )
+    {
+        error_msg = e.what();
+    }
 
     log_test( "test_6_load_nok_1", b, false, "non-existing user file was not loaded", "non-existing user file was unexpectedly loaded", error_msg );
 }
@@ -520,7 +552,18 @@ void test_7_load_add_save_ok_1()
 
     std::string error_msg;
 
-    auto b = m.load( "test.dat", & error_msg );
+    auto b = false;
+
+    try
+    {
+        m.init( "test.dat" );
+
+        b = true;
+    }
+    catch( std::exception & e )
+    {
+        error_msg = e.what();
+    }
 
     log_test( "test_7_load_add_save_ok_1: 1", b, true, "user file was loaded", "cannot load file", error_msg );
 
@@ -542,7 +585,18 @@ void test_8_load_add_nok_1()
 
     std::string error_msg;
 
-    auto b = m.load( "test.dat", & error_msg );
+    auto b = false;
+
+    try
+    {
+        m.init( "test.dat" );
+
+        b = true;
+    }
+    catch( std::exception & e )
+    {
+        error_msg = e.what();
+    }
 
     log_test( "test_8_load_add_nok_1: 1", b, true, "user file was loaded", "cannot load file", error_msg );
 
