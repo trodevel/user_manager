@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 13884 $ $Date:: 2020-09-27 #$ $Author: serge $
+// $Revision: 13917 $ $Date:: 2020-10-02 #$ $Author: serge $
 
 #include "user_manager.h"               // self
 
@@ -35,7 +35,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 namespace user_manager
 {
 
-UserManager::UserManager()
+UserManager::UserManager():
+    is_inited_( false )
 {
 }
 
@@ -45,11 +46,17 @@ UserManager::~UserManager()
 
 void UserManager::init()
 {
+    assert( is_inited__() == false );
+
     req_id_gen_.init( 1, 1 );
 
     users_.reset( new anyvalue_db::Table() );
 
     users_->init( std::vector<anyvalue_db::field_id_t>( { User::USER_ID, User::LOGIN, User::REGISTRATION_KEY } ));
+
+    is_inited_ = true;
+
+    dummy_log_error( MODULENAME, "init: ok" );
 }
 
 void UserManager::init(
@@ -80,6 +87,10 @@ void UserManager::init(
     req_id_gen_.init( last_id.arg_i, 1 );
 
     users_.reset( users.release() );
+
+    is_inited_ = true;
+
+    dummy_log_info( MODULENAME, "init: ok, filename %s, last_id %u, size %u", filename.c_str(), last_id.arg_i, users_->get_size() );
 }
 
 user_id_t UserManager::convert_login_to_user_id( const std::string & login, bool is_case_sensitive ) const
@@ -251,7 +262,7 @@ std::mutex & UserManager::get_mutex() const
 
 bool UserManager::is_inited__() const
 {
-    return users_ != nullptr;
+    return is_inited_;
 }
 
 bool UserManager::save( std::string * error_msg, const std::string & filename ) const

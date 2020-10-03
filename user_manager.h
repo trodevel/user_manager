@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// $Revision: 13884 $ $Date:: 2020-09-27 #$ $Author: serge $
+// $Revision: 13917 $ $Date:: 2020-10-02 #$ $Author: serge $
 
 #ifndef USER_MANAGER_USER_MANAGER_H
 #define USER_MANAGER_USER_MANAGER_H
@@ -95,7 +95,9 @@ private:
     bool is_inited__() const;
 
 private:
-    // Config
+
+    bool                        is_inited_;
+
     std::string                 credentials_file_;
 
     std::unique_ptr<anyvalue_db::Table> users_;
